@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             $user->email = 'inventory@mail.com';
             $user->name = 'User Inventory';
             $user->password = bcrypt('123456');
-            $user->role = User::ROLE_INVENTORY;
+            $user->role = User::ROLE_INVENTORY_MANAGER;
             $user->save();
 
             $user = new User();

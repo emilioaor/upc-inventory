@@ -19,4 +19,34 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('translation/{locale}', [\App\Http\Controllers\Controller::class, 'translations']);
+
+Route::group(['middleware' => 'auth'], function () {
+    // Auth users
+
+    Route::group(['prefix' => 'admin', 'middleware' => 'role', 'roles' => ['administrator']], function () {
+        // Administrator
+        Route::post('user/exists', [\App\Http\Controllers\UserController::class, 'exists']);
+        Route::resource('user', \App\Http\Controllers\UserController::class);
+    });
+
+    Route::group([
+        'prefix' => 'manager',
+        'middleware' => 'role',
+        'roles' => ['administrator', 'inventory_manager']
+    ], function () {
+        // Inventory manager
+    });
+
+    Route::group([
+        'prefix' => 'warehouse',
+        'middleware' => 'role',
+        'roles' => ['administrator', 'inventory_manager', 'warehouse']
+    ], function () {
+        // Everybody
+        Route::get('user/config', [\App\Http\Controllers\UserController::class, 'config'])->name('user.config');
+        Route::put('user/config', [\App\Http\Controllers\UserController::class, 'updateConfig'])->name('user.updateConfig');
+
+    });
+
+});
