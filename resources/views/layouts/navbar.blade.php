@@ -16,6 +16,35 @@
                         ]
                     ]
                 ])
+
+            @include('layouts.navbar-item', [
+                    'label' => __('menu.digitalInventory'),
+                    'show' => Auth::user()->isAdmin() || Auth::user()->isInventoryManager(),
+                    'items' => [
+                        [
+                            'label' => __('menu.addNew'),
+                            'route' => route('digital-inventory.create'),
+                        ],
+                        [
+                            'label' => __('menu.list'),
+                            'route' => route('digital-inventory.index'),
+                        ]
+                    ]
+                ])
+
+            @include('layouts.navbar-item', [
+                    'label' => __('menu.warehouse'),
+                    'items' => [
+                        [
+                            'label' => __('menu.addNew'),
+                            'route' => route('user.create'),
+                        ],
+                        [
+                            'label' => __('menu.list'),
+                            'route' => route('user.index'),
+                        ]
+                    ]
+                ])
         @endauth
     </ul>
 

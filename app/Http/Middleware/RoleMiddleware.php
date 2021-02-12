@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Providers\RouteServiceProvider;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class RoleMiddleware
                 return response()->json(['Forbidden'], 403);
             }
 
-            return redirect('/');
+            return redirect(RouteServiceProvider::HOME);
         }
 
         return $next($request);

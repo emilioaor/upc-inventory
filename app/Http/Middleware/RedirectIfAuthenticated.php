@@ -23,7 +23,16 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect()->route('user.index');
+
+                if (Auth::user()->isAdmin()) {
+                    return redirect()->route('user.index');
+                }
+
+                if (Auth::user()->isInventoryManager()) {
+                    return redirect()->route('digital-inventory.index');
+                }
+
+                dd('TODO');
             }
         }
 

@@ -36,6 +36,7 @@ Route::group(['middleware' => 'auth'], function () {
         'roles' => ['administrator', 'inventory_manager']
     ], function () {
         // Inventory manager
+        Route::resource('digital-inventory', \App\Http\Controllers\DigitalInventoryController::class);
     });
 
     Route::group([
@@ -47,6 +48,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('user/config', [\App\Http\Controllers\UserController::class, 'config'])->name('user.config');
         Route::put('user/config', [\App\Http\Controllers\UserController::class, 'updateConfig'])->name('user.updateConfig');
 
+        Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
     });
 
 });
