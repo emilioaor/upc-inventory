@@ -155,7 +155,18 @@ return [
         'password_confirmation' => 'Password confirmation',
         'currentPassword' => 'Current password',
         'newPassword' => 'New password',
-        'newPasswordConfirmation' => 'New password confirmation'
+        'newPasswordConfirmation' => 'New password confirmation',
+        'description' => 'Description',
+        'createdBy' => 'Created by',
+        'createdAt' => 'Created at',
+        'file' => 'File',
+        'product' => 'Product',
+        'qty' => 'Qty',
+        'digital' => 'Digital',
+        'physical' => 'Physical',
+        'diff' => 'Diff',
+        'upc' => 'UPC',
+        'serial' => 'Serial'
     ],
 
 ];

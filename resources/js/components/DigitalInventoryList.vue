@@ -2,7 +2,7 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <i class="fa fa-list"></i> {{ t('menu.users') }}
+                <i class="fa fa-list"></i> {{ t('menu.digitalInventory') }}
             </div>
             <div class="card-body">
                 <table-filter>
@@ -16,19 +16,19 @@
                 <table class="table table-responsive">
                     <thead>
                     <tr>
-                        <th>{{ t('validation.attributes.name') }}</th>
-                        <th>{{ t('validation.attributes.email') }}</th>
-                        <th>{{ t('validation.attributes.role') }}</th>
+                        <th>{{ t('validation.attributes.description') }}</th>
+                        <th>{{ t('validation.attributes.createdBy') }}</th>
+                        <th>{{ t('validation.attributes.createdAt') }}</th>
                         <th width="5%"></th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr v-for="item in items" :key="item.id">
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.email }}</td>
-                        <td>{{ t('role.' + item.role) }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.user.name }}</td>
+                        <td>{{ item.created_at |date(true) }}</td>
                         <td>
-                            <a :href="'/admin/user/' + item.uuid + '/edit'" class="btn btn-warning">
+                            <a :href="'/manager/digital-inventory/' + item.uuid + '/edit'" class="btn btn-warning">
                                 <i class="fa fa-edit"></i>
                             </a>
                         </td>

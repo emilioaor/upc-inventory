@@ -22,4 +22,9 @@ return [
     'close' => 'Close',
     'at' => 'At',
     'new' => 'New',
+    'line' => 'Line',
+    'errors' => 'Errors',
+    'inventory' => 'Inventory',
+    'template' => 'Template',
+    'download' => 'Download'
 ];

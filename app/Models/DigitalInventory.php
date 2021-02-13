@@ -4,9 +4,16 @@ namespace App\Models;
 
 use App\Contract\SearchTrait;
 use App\Contract\UuidGeneratorTrait;
+use App\Exceptions\DigitalInventoryException;
+use App\Imports\DigitalInventoryImport;
+use App\Imports\ProductImport;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DigitalInventory extends Model
 {
@@ -18,6 +25,19 @@ class DigitalInventory extends Model
     protected $fillable = ['description', 'user_id'];
 
     protected $search_fields = ['description'];
+
+    /**
+     * DigitalInventory constructor.
+     * @param array $attributes
+     */
+    public function __construct(array $attributes = [])
+    {
+        if (Auth::check()) {
+            $attributes['user_id'] = Auth::user()->id;
+        }
+
+        parent::__construct($attributes);
+    }
 
     /**
      * Created by
@@ -37,5 +57,61 @@ class DigitalInventory extends Model
     public function inventoryMovements()
     {
         return $this->hasMany(InventoryMovement::class);
+    }
+
+    /**
+     * Digital inventory movements
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function digitalInventoryMovements()
+    {
+        return $this->inventoryMovements()->where('type', InventoryMovement::TYPE_DIGITAL);
+    }
+
+    /**
+     * Physical inventory movements
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function physicalInventoryMovements()
+    {
+        return $this->inventoryMovements()->where('type', InventoryMovement::TYPE_PHYSICAL);
+    }
+
+    /**
+     * Attach document
+     *
+     * @param string $base64
+     * @param string $filename
+     * @return string
+     */
+    public function attachDocument(string $base64, string $filename): string
+    {
+        $explode = explode(',', $base64);
+        $filename = sprintf('%s-%s', $filename, ((string) time()));
+        $format = 'xlsx';
+
+        $path = sprintf('digital-inventory/%s/%s.%s', $this->uuid, $filename, $format);
+        Storage::disk('public')->put($path, base64_decode($explode[1]));
+
+        return $path;
+    }
+
+    /**
+     * Process the Excel file and load inventory
+     *
+     * @return array
+     */
+    public function loadInventory()
+    {
+        try {
+            Excel::import(new DigitalInventoryImport($this), storage_path('app/public/' . $this->file));
+        } catch (DigitalInventoryException $ex) {
+
+            return ['success' => false, 'errors' => $ex->getErrors(), 'line' => $ex->getFileLine()];
+        }
+
+        return ['success' => true];
     }
 }
