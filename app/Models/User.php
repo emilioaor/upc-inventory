@@ -111,4 +111,24 @@ class User extends Authenticatable
             self::ROLE_WAREHOUSE => __('role.' . self::ROLE_WAREHOUSE),
         ];
     }
+
+    /**
+     * Digital inventories
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function digitalInventories()
+    {
+        return $this->hasMany(DigitalInventory::class);
+    }
+
+    /**
+     * Inventory movements
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
 }

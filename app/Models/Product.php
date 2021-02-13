@@ -18,4 +18,14 @@ class Product extends Model
     protected $fillable = ['name', 'upc', 'serial', 'location'];
 
     protected $search_fields = ['name', 'upc', 'serial', 'location'];
+
+    /**
+     * Inventory movements
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
 }

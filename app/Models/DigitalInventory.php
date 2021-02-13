@@ -18,4 +18,24 @@ class DigitalInventory extends Model
     protected $fillable = ['description', 'user_id'];
 
     protected $search_fields = ['description'];
+
+    /**
+     * Created by
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class)->withTrashed();
+    }
+
+    /**
+     * Inventory movements
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
 }
