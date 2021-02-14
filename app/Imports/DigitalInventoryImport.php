@@ -30,11 +30,9 @@ class DigitalInventoryImport implements ToCollection, WithHeadingRow
     */
     public function collection(Collection $collection)
     {
-        foreach ($collection as $i => $row) {
+        $rows = $this->getValidRows($collection);
 
-            if (! $this->isRowValid($row->toArray(), $i)) {
-                continue;
-            }
+        foreach ($rows as $row) {
 
             $product = Product::query()->where('upc', $row['upc'])->first();
 
@@ -84,5 +82,29 @@ class DigitalInventoryImport implements ToCollection, WithHeadingRow
         }
 
         return false;
+    }
+
+    /**
+     * Get valid rows
+     *
+     * @param Collection $collection
+     * @return array
+     * @throws DigitalInventoryException
+     */
+    public function getValidRows(Collection $collection)
+    {
+        $rows = [];
+
+        foreach ($collection as $i => $row) {
+            if ($this->isRowValid($row->toArray(), $i)) {
+                $rows[] = $row;
+            }
+        }
+
+        if (count($rows) === 0) {
+            throw new DigitalInventoryException([__('validation.empty', ['attribute' => 'file'])], 1);
+        }
+
+        return $rows;
     }
 }

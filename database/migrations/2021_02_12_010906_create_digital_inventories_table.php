@@ -19,6 +19,7 @@ class CreateDigitalInventoriesTable extends Migration
             $table->string('description');
             $table->string('file');
             $table->foreignId('user_id')->constrained('users');
+            $table->boolean('inventory_crossover_enabled');
             $table->timestamps();
             $table->softDeletes();
         });

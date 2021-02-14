@@ -45,7 +45,6 @@ class DigitalInventoryController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
-
         $digitalInventory = new DigitalInventory($request->all());
         $digitalInventory->file = $digitalInventory->attachDocument($request->file, 'digital-inventory');
         $digitalInventory->save();
@@ -104,7 +103,13 @@ class DigitalInventoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $digitalInventory = DigitalInventory::query()->uuid($id)->firstOrFail();
+        $digitalInventory->fill($request->all());
+        $digitalInventory->save();
+
+        AlertService::alertSuccess(__('alert.processSuccessfully'));
+
+        return response()->json(['success' => true, 'redirect' => route('digital-inventory.edit', [$id])]);
     }
 
     /**

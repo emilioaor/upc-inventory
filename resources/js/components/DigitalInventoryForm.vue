@@ -53,17 +53,6 @@
                             </span>
                         </div>
 
-                        <div class="col-sm-6 col-lg-4 form-group" v-if="! editData">
-                            <label>{{ t('form.template') }}</label>
-
-                            <div>
-                                <a href="/excel/digital_inventory_template.xlsx" download>
-                                    <i class="fa fa-download"></i>
-                                    {{ t('form.download') }}
-                                </a>
-                            </div>
-                        </div>
-
                         <div class="col-sm-6 col-lg-4 form-group" v-if="editData">
                             <label>{{ t('validation.attributes.createdBy') }}</label>
                             <input
@@ -82,6 +71,39 @@
                                     :value="form.created_at |date(true)"
                                     :disabled="true"
                             >
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4 form-group">
+                            <label>{{ t('validation.attributes.inventory_crossover_enabled') }}</label>
+                            <div>
+                                <div>
+                                    <div
+                                            class="confirmation-checkbox text-white d-flex justify-content-start"
+                                            @click="form.inventory_crossover_enabled = ! form.inventory_crossover_enabled"
+                                            :class="{
+                                            'justify-content-end': form.inventory_crossover_enabled
+                                        }"
+                                    >
+                                        <div v-if="form.inventory_crossover_enabled" class="bg-success ">
+                                            {{ t('form.yes') }}
+                                        </div>
+                                        <div v-else class="bg-danger">
+                                            {{ t('form.no') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4 form-group" v-if="! editData">
+                            <label>{{ t('form.template') }}</label>
+
+                            <div>
+                                <a href="/excel/digital_inventory_template.xlsx" download>
+                                    <i class="fa fa-download"></i>
+                                    {{ t('form.download') }}
+                                </a>
+                            </div>
                         </div>
 
                     </div>
@@ -118,7 +140,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer" v-if="! editData">
+                <div class="card-footer">
                     <button v-if="!loading" class="btn btn-success">
                         <i class="fa fa-save"></i>
                         {{ t('form.save') }}
@@ -191,7 +213,8 @@
                     description: null,
                     file: null,
                     digital_inventory_movements: [],
-                    physical_inventory_movements: []
+                    physical_inventory_movements: [],
+                    inventory_crossover_enabled: false
                 },
                 modal: {
                     errors: [],
@@ -282,3 +305,19 @@
         }
     }
 </script>
+
+<style lang="scss" scoped>
+    .confirmation-checkbox {
+        border: solid 1px #ccc;
+        border-radius: 20px;
+        cursor: pointer;
+        padding: .2rem;
+        background-color: #cddd;
+        max-width: 100px;
+
+        div {
+            padding: .3rem .4rem;
+            border-radius: 50%;
+        }
+    }
+</style>

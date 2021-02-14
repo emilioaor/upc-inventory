@@ -118,6 +118,7 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'empty' => 'The :attribute is empty',
 
     /*
     |--------------------------------------------------------------------------
@@ -166,7 +167,8 @@ return [
         'physical' => 'Physical',
         'diff' => 'Diff',
         'upc' => 'UPC',
-        'serial' => 'Serial'
+        'serial' => 'Serial',
+        'inventory_crossover_enabled' => 'Inventory crossover enabled?'
     ],
 
 ];

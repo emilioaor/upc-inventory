@@ -6,12 +6,10 @@ use App\Contract\SearchTrait;
 use App\Contract\UuidGeneratorTrait;
 use App\Exceptions\DigitalInventoryException;
 use App\Imports\DigitalInventoryImport;
-use App\Imports\ProductImport;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,7 +20,7 @@ class DigitalInventory extends Model
     use UuidGeneratorTrait;
     use SearchTrait;
 
-    protected $fillable = ['description', 'user_id'];
+    protected $fillable = ['description', 'inventory_crossover_enabled'];
 
     protected $search_fields = ['description'];
 
@@ -33,7 +31,7 @@ class DigitalInventory extends Model
     public function __construct(array $attributes = [])
     {
         if (Auth::check()) {
-            $attributes['user_id'] = Auth::user()->id;
+            $this->user_id = Auth::user()->id;
         }
 
         parent::__construct($attributes);
