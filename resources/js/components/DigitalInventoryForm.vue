@@ -58,7 +58,7 @@
                             <input
                                     type="text"
                                     class="form-control"
-                                    v-model="form.user.name"
+                                    :value="form.user ? form.user.name : ''"
                                     :disabled="true"
                             >
                         </div>
@@ -73,7 +73,7 @@
                             >
                         </div>
 
-                        <div class="col-sm-6 col-lg-4 form-group">
+                        <div class="col-sm-6 col-lg-4 form-group" v-if="crossoverSelect">
                             <label>{{ t('validation.attributes.inventory_crossover_enabled') }}</label>
                             <div>
                                 <div>
@@ -93,6 +93,19 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="col-sm-6 col-lg-4 form-group" v-else>
+                            <button
+                                    type="button"
+                                    class="btn btn-success"
+                                    data-toggle="modal"
+                                    data-target="#modalInventory"
+                                    @click="startInventoryCrossover()"
+                            >
+                                <i class="fa fa-barcode"></i>
+                                {{ t('form.startInventoryCrossover') }}
+                            </button>
                         </div>
 
                         <div class="col-sm-6 col-lg-4 form-group" v-if="! editData">
@@ -140,7 +153,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer">
+                <div class="card-footer" v-if="crossoverSelect">
                     <button v-if="!loading" class="btn btn-success">
                         <i class="fa fa-save"></i>
                         {{ t('form.save') }}
@@ -185,6 +198,79 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalInventory" tabindex="-1" role="dialog" aria-labelledby="modalInventory" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header pb-0 pt-2">
+                        <div></div>
+                        <div>
+                            <button class="btn btn-link" type="button" data-dismiss="modal">X</button>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+
+
+                        <div class="row">
+                            <div class="col-5">
+                                <label>
+                                    {{ t('validation.attributes.upc') }}
+                                    <i class="fa fa-barcode"></i>
+                                </label>
+                                <div class="input-group mb-3">
+                                    <input
+                                        type="text"
+                                        id="newUPC"
+                                        class="form-control"
+                                        :class="{'is-invalid': newUPC.error}"
+                                        v-model="newUPC.upc"
+                                        @keyup.13="findProduct()"
+                                        autocomplete="off"
+                                    >
+                                    <div class="input-group-append">
+                                        <button
+                                            class="btn btn-success"
+                                            type="button"
+                                            :disabled="newUPC.loading"
+                                            @click="findProduct()"
+                                        >
+
+                                            <i class="spinner-border spinner-border-sm" v-if="newUPC.loading"></i>
+                                            <i class="fa fa-plus" v-else></i>
+                                        </button>
+                                    </div>
+
+                                    <span class="invalid-feedback d-block" role="alert" v-if="newUPC.error">
+                                        <strong>{{ t('form.upcNotExists') }}</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-striped table-responsive" v-if="newUPC.products.length">
+                            <thead>
+                                <tr>
+                                    <th width="1%">{{ t('validation.attributes.upc') }}</th>
+                                    <th>{{ t('validation.attributes.product') }}</th>
+                                    <th width="15%">{{ t('validation.attributes.qty') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="product in newUPC.products">
+                                    <td>{{ product.upc }}</td>
+                                    <td>{{ product.name }}</td>
+                                    <td>
+                                        <input type="number" class="form-control" v-model="product.qty">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -196,6 +282,12 @@
             editData: {
                 type: Object,
                 required: false
+            },
+
+            crossoverSelect: {
+                type: Boolean,
+                required: false,
+                default: false
             }
         },
 
@@ -219,6 +311,12 @@
                 modal: {
                     errors: [],
                     line: []
+                },
+                newUPC: {
+                    upc: null,
+                    loading: false,
+                    error: false,
+                    products: []
                 }
             }
         },
@@ -263,6 +361,39 @@
                 });
 
                 reader.readAsDataURL(file);
+            },
+
+            startInventoryCrossover() {
+                window.setTimeout(() => {
+                    document.querySelector('#newUPC').focus();
+                }, 500)
+            },
+
+            findProduct() {
+                if (this.newUPC.upc) {
+
+                    this.newUPC.loading = true;
+
+                    axios.get('/warehouse/inventory/' + this.newUPC.upc)
+                        .then(res => {
+
+                            if (! res.data.data) {
+                                this.newUPC.error = true;
+                            } else {
+                                this.newUPC.products.push({
+                                    ...res.data.data,
+                                    qty: 1
+                                });
+                                this.newUPC.upc = null;
+                                document.querySelector('#newUPC').focus();
+                            }
+
+                            this.newUPC.loading = false;
+                        })
+                        .catch(err => {
+                            this.newUPC.loading = false;
+                        })
+                }
             }
         },
 
@@ -301,6 +432,12 @@
                 });
 
                 return products;
+            }
+        },
+
+        watch: {
+            "newUPC.upc"(old, value) {
+                this.newUPC.error = false;
             }
         }
     }

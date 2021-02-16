@@ -7,6 +7,7 @@ return [
     'users' => 'Users',
     'security' => 'Security',
     'digitalInventory' => 'Digital inventory',
-    'warehouse' => 'Warehouse'
+    'warehouse' => 'Warehouse',
+    'inventoryCrossover' => 'Inventory crossover'
 
 ];

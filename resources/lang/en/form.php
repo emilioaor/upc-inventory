@@ -26,5 +26,7 @@ return [
     'errors' => 'Errors',
     'inventory' => 'Inventory',
     'template' => 'Template',
-    'download' => 'Download'
+    'download' => 'Download',
+    'startInventoryCrossover' => 'Start inventory crossover',
+    'upcNotExists' => 'UPC not exists in this inventory'
 ];

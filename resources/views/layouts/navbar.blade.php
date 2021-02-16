@@ -36,12 +36,8 @@
                     'label' => __('menu.warehouse'),
                     'items' => [
                         [
-                            'label' => __('menu.addNew'),
-                            'route' => route('user.create'),
-                        ],
-                        [
-                            'label' => __('menu.list'),
-                            'route' => route('user.index'),
+                            'label' => __('menu.inventoryCrossover'),
+                            'route' => route('inventory.index'),
                         ]
                     ]
                 ])

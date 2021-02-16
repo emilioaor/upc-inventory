@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DigitalInventory;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -9,11 +11,19 @@ class InventoryController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $digitalInventories = DigitalInventory::query()
+            ->with(['user'])
+            ->search($request->search)
+            ->where('inventory_crossover_enabled', true)
+            ->orderBy('id', 'DESC')
+            ->paginate();
+
+        return view('inventory.index', compact('digitalInventories'));
     }
 
     /**
@@ -45,7 +55,9 @@ class InventoryController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = Product::query()->where('upc', $id)->first();
+
+        return response()->json(['success' => true, 'data' => $product]);
     }
 
     /**
@@ -56,7 +68,18 @@ class InventoryController extends Controller
      */
     public function edit($id)
     {
-        //
+        $digitalInventory = DigitalInventory::query()
+            ->with([
+                'digitalInventoryMovements.product',
+                'physicalInventoryMovements.product',
+                'user'
+            ])
+            ->uuid($id)
+            ->where('inventory_crossover_enabled', true)
+            ->firstOrFail()
+        ;
+
+        return view('inventory.form', compact('digitalInventory'));
     }
 
     /**
