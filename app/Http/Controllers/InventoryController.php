@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DigitalInventory;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -44,7 +45,27 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $digitalInventory = DigitalInventory::query()
+            ->where('id', $request->digital_inventory_id)
+            ->where('inventory_crossover_enabled', true)
+            ->firstOrFail()
+        ;
+        $product = Product::query()->where('upc', $request->upc)->first();
+
+        if (! $product) {
+            return response()->json(['success' => false, 'data' => $product]);
+        }
+
+        $inventoryMovement = new InventoryMovement();
+        $inventoryMovement->digital_inventory_id = $digitalInventory->id;
+        $inventoryMovement->product_id = $product->id;
+        $inventoryMovement->type = InventoryMovement::TYPE_PHYSICAL;
+        $inventoryMovement->qty = 1;
+        $inventoryMovement->save();
+
+        $inventoryMovement->product = $inventoryMovement->product;
+
+        return response()->json(['success' => true, 'data' => $inventoryMovement]);
     }
 
     /**
@@ -91,7 +112,11 @@ class InventoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $inventoryMovement = InventoryMovement::query()->findOrFail($id);
+        $inventoryMovement->qty = $request->qty;
+        $inventoryMovement->save();
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -102,6 +127,9 @@ class InventoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $inventoryMovement = InventoryMovement::query()->findOrFail($id);
+        $inventoryMovement->delete();
+
+        return response()->json(['success' => true]);
     }
 }

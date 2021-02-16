@@ -225,7 +225,7 @@
                                         class="form-control"
                                         :class="{'is-invalid': newUPC.error}"
                                         v-model="newUPC.upc"
-                                        @keyup.13="findProduct()"
+                                        @keyup.13="addProduct()"
                                         autocomplete="off"
                                     >
                                     <div class="input-group-append">
@@ -233,7 +233,7 @@
                                             class="btn btn-success"
                                             type="button"
                                             :disabled="newUPC.loading"
-                                            @click="findProduct()"
+                                            @click="addProduct()"
                                         >
 
                                             <i class="spinner-border spinner-border-sm" v-if="newUPC.loading"></i>
@@ -248,24 +248,47 @@
                             </div>
                         </div>
 
-                        <table class="table table-striped table-responsive" v-if="newUPC.products.length">
-                            <thead>
+                        <div class="upc-table-container">
+                            <table class="table table-striped table-responsive" v-if="newUPC.physical_inventory_movements.length">
+                                <thead>
                                 <tr>
                                     <th width="1%">{{ t('validation.attributes.upc') }}</th>
                                     <th>{{ t('validation.attributes.product') }}</th>
-                                    <th width="15%">{{ t('validation.attributes.qty') }}</th>
+                                    <th width="15%" class="text-center">{{ t('validation.attributes.qty') }}</th>
+                                    <th width="1%"></th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="product in newUPC.products">
-                                    <td>{{ product.upc }}</td>
-                                    <td>{{ product.name }}</td>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(movement, i) in newUPC.physical_inventory_movements">
+                                    <td>{{ movement.product.upc }}</td>
+                                    <td>{{ movement.product.name }}</td>
+                                    <td class="text-center">
+
+                                        <input
+                                            type="number"
+                                            :id="'movement-product-' + i"
+                                            class="form-control"
+                                            v-model="movement.qty"
+                                            @blur="changeQTY(i)"
+                                            :disabled="newUPC.loadingInventory === movement.id"
+                                        >
+                                    </td>
                                     <td>
-                                        <input type="number" class="form-control" v-model="product.qty">
+                                        <i v-if="newUPC.loadingInventory === movement.id" class="spinner-border spinner-border-sm"></i>
+
+                                        <button
+                                            v-else
+                                            type="button"
+                                            class="btn btn-sm btn-danger"
+                                            @click="deleteMovement(i)"
+                                        >
+                                            <i class="fa fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
 
                     </div>
                 </div>
@@ -288,12 +311,21 @@
                 type: Boolean,
                 required: false,
                 default: false
+            },
+
+            user: {
+                type: Object,
+                required: true
             }
         },
 
         mounted() {
             if (this.editData) {
                 this.form = {...this.editData};
+
+                this.newUPC.physical_inventory_movements = [
+                    ...this.form.physical_inventory_movements.filter(m => m.user_id === this.user.id)
+                ];
             }
         },
 
@@ -315,8 +347,9 @@
                 newUPC: {
                     upc: null,
                     loading: false,
+                    loadingInventory: null,
                     error: false,
-                    products: []
+                    physical_inventory_movements: []
                 }
             }
         },
@@ -369,20 +402,22 @@
                 }, 500)
             },
 
-            findProduct() {
+            addProduct() {
                 if (this.newUPC.upc) {
 
                     this.newUPC.loading = true;
 
-                    axios.get('/warehouse/inventory/' + this.newUPC.upc)
+                    ApiService.post('/warehouse/inventory', {
+                        upc: this.newUPC.upc,
+                        digital_inventory_id: this.form.id
+                    })
                         .then(res => {
 
                             if (! res.data.data) {
                                 this.newUPC.error = true;
                             } else {
-                                this.newUPC.products.push({
-                                    ...res.data.data,
-                                    qty: 1
+                                this.newUPC.physical_inventory_movements.unshift({
+                                    ...res.data.data
                                 });
                                 this.newUPC.upc = null;
                                 document.querySelector('#newUPC').focus();
@@ -394,6 +429,47 @@
                             this.newUPC.loading = false;
                         })
                 }
+            },
+
+            changeQTY(index) {
+                const movement = this.newUPC.physical_inventory_movements[index];
+                const qty = parseInt(movement.qty);
+
+                if (qty && qty > 0) {
+
+                    this.newUPC.loadingInventory = movement.id;
+
+                    ApiService.put('/warehouse/inventory/' + movement.id, {qty})
+                        .then(res => {
+
+                            if (res.data.success) {
+                                this.newUPC.loadingInventory = null;
+                            }
+
+                        }).catch(err => {
+                            this.newUPC.loadingInventory = null;
+                        });
+
+                } else {
+                    this.newUPC.physical_inventory_movements[index].qty = 1;
+                    document.querySelector('#movement-product-' + index).focus();
+                }
+            },
+
+            deleteMovement(index) {
+                const movement = this.newUPC.physical_inventory_movements[index];
+                this.newUPC.loadingInventory = movement.id;
+
+                ApiService.delete('/warehouse/inventory/' + movement.id)
+                    .then(res => {
+                        if (res.data.success) {
+                            this.newUPC.loadingInventory = false;
+                            this.newUPC.physical_inventory_movements.splice(index, 1);
+                        }
+                    })
+                    .catch(err => {
+                        this.newUPC.loadingInventory = false;
+                    })
             }
         },
 
@@ -406,7 +482,7 @@
                     const currentProduct = products.find(p => p.id === movement.product_id);
 
                     if (currentProduct) {
-                        currentProduct.digital += movement.qty;
+                        currentProduct.digital += parseInt(movement.qty);
                     } else {
                         products.push({
                             ...movement.product,
@@ -421,7 +497,7 @@
                     const currentProduct = products.find(p => p.id === movement.product_id);
 
                     if (currentProduct) {
-                        currentProduct.physical += movement.qty;
+                        currentProduct.physical += parseInt(movement.qty);
                     } else {
                         products.push({
                             ...movement.product,
@@ -456,5 +532,11 @@
             padding: .3rem .4rem;
             border-radius: 50%;
         }
+    }
+
+    .upc-table-container {
+        max-height: 65vh;
+        overflow: auto;
+        border-top: solid 1px #1A3660;
     }
 </style>
