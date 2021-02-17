@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DigitalInventoryUpdated;
 use App\Models\DigitalInventory;
 use App\Models\InventoryMovement;
 use App\Models\Product;
@@ -65,6 +66,8 @@ class InventoryController extends Controller
 
         $inventoryMovement->product = $inventoryMovement->product;
 
+        broadcast(new DigitalInventoryUpdated($digitalInventory->id));
+
         return response()->json(['success' => true, 'data' => $inventoryMovement]);
     }
 
@@ -116,6 +119,8 @@ class InventoryController extends Controller
         $inventoryMovement->qty = $request->qty;
         $inventoryMovement->save();
 
+        broadcast(new DigitalInventoryUpdated($inventoryMovement->digital_inventory_id));
+
         return response()->json(['success' => true]);
     }
 
@@ -129,6 +134,8 @@ class InventoryController extends Controller
     {
         $inventoryMovement = InventoryMovement::query()->findOrFail($id);
         $inventoryMovement->delete();
+
+        broadcast(new DigitalInventoryUpdated($inventoryMovement->digital_inventory_id));
 
         return response()->json(['success' => true]);
     }

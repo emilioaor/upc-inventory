@@ -329,6 +329,26 @@
             }
         },
 
+        created() {
+            if (this.editData) {
+
+                Echo.join(`digital-inventory-${this.editData.id}`)
+                    .here((users) => {
+                        // console.log(users);
+                    })
+                    .joining((user) => {
+                        // console.log(user.name);
+                    })
+                    .leaving((user) => {
+                        // console.log(user.name);
+                    })
+                    .listen('DigitalInventoryUpdated', (event) => {
+                        this.form.physical_inventory_movements = event.physicalInventoryMovements;
+                    });
+
+            }
+        },
+
         data() {
             return {
                 loading: false,

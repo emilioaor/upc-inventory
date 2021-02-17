@@ -32,7 +32,7 @@ class RedirectIfAuthenticated
                     return redirect()->route('digital-inventory.index');
                 }
 
-                dd('TODO');
+                return redirect()->route('inventory.index');
             }
         }
 
