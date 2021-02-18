@@ -136,6 +136,7 @@
                                         <th width="1%" class="text-center">{{ t('validation.attributes.digital') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.physical') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.diff') }}</th>
+                                        <th width="1%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -146,6 +147,17 @@
                                         <td class="text-center">{{ product.digital }}</td>
                                         <td class="text-center">{{ product.physical }}</td>
                                         <td class="text-center">{{ product.physical - product.digital }}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                class="btn btn-primary btn-sm"
+                                                data-toggle="modal"
+                                                data-target="#modalProductDetail"
+                                                @click="openProductDetail(product)"
+                                            >
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -294,6 +306,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalProductDetail" tabindex="-1" role="dialog" aria-labelledby="modalProductDetail" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content" v-if="productDetail.product">
+                    <div class="modal-header pb-0 pt-2">
+                        <div></div>
+                        <div>
+                            <button class="btn btn-link" type="button" data-dismiss="modal">X</button>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+
+                        <h5>
+                            <strong>
+                                {{ productDetail.product.name }}
+                                <small>({{ productDetail.product.upc }})</small>
+                            </strong>
+                        </h5>
+
+                        <div class="upc-table-container mt-3">
+                            <table class="table table-striped table-responsive" v-if="productDetail.physical_inventory_movements.length">
+                                <thead>
+                                <tr>
+                                    <th>{{ t('validation.attributes.date') }}</th>
+                                    <th>{{ t('validation.attributes.createdBy') }}</th>
+                                    <th width="1%" class="text-center pr-3">{{ t('validation.attributes.qty') }}</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(movement, i) in productDetail.physical_inventory_movements">
+                                    <td>{{ movement.created_at | date(true) }}</td>
+                                    <td>{{ movement.user.name }}</td>
+                                    <td class="text-center">{{ movement.qty }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -369,6 +424,10 @@
                     loading: false,
                     loadingInventory: null,
                     error: false,
+                    physical_inventory_movements: []
+                },
+                productDetail: {
+                    product: null,
                     physical_inventory_movements: []
                 }
             }
@@ -449,6 +508,13 @@
                             this.newUPC.loading = false;
                         })
                 }
+            },
+
+            openProductDetail(product) {
+                this.productDetail = {
+                    product: {...product},
+                    physical_inventory_movements: this.form.physical_inventory_movements.filter(m => m.product_id === product.id)
+                };
             },
 
             changeQTY(index) {

@@ -168,7 +168,8 @@ return [
         'diff' => 'Diff',
         'upc' => 'UPC',
         'serial' => 'Serial',
-        'inventory_crossover_enabled' => 'Inventory crossover enabled?'
+        'inventory_crossover_enabled' => 'Inventory crossover enabled?',
+        'date' => 'Date'
     ],
 
 ];
