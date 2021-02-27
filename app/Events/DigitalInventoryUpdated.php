@@ -27,9 +27,13 @@ class DigitalInventoryUpdated implements ShouldBroadcast
     {
         $this->digitalInventoryId = $digitalInventoryId;
 
-        $this->physicalInventoryMovements = DigitalInventory::query()->find($digitalInventoryId)
+        $digitalInventory = DigitalInventory::query()->find($digitalInventoryId);
+
+        $this->physicalInventoryMovements = $digitalInventory
             ->physicalInventoryMovements()
+            ->with(['user', 'product'])
             ->get()
+            ->toArray()
         ;
     }
 

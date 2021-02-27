@@ -64,7 +64,11 @@ class DigitalInventory extends Model
      */
     public function digitalInventoryMovements()
     {
-        return $this->inventoryMovements()->where('type', InventoryMovement::TYPE_DIGITAL)->orderBy('id', 'DESC');
+        return $this->inventoryMovements()
+            ->where('type', InventoryMovement::TYPE_DIGITAL)
+            ->with(['user'])
+            ->orderBy('id', 'DESC')
+        ;
     }
 
     /**

@@ -225,7 +225,7 @@
 
 
                         <div class="row">
-                            <div class="col-5">
+                            <div class="col-lg-5">
                                 <label>
                                     {{ t('validation.attributes.upc') }}
                                     <i class="fa fa-barcode"></i>
@@ -258,6 +258,86 @@
                                     </span>
                                 </div>
                             </div>
+
+                            <div class="col-12">
+                                <div v-if="newUPC.error">
+                                    <button
+                                            v-if="! newProduct.show"
+                                            type="button"
+                                            class="btn btn-secondary btn-sm mb-2"
+                                            @click="showNewProductForm()"
+                                    >
+                                        <i class="fa fa-plus"></i>
+                                        {{ t('form.addNewProduct') }}
+                                    </button>
+
+                                    <div v-if="newProduct.show">
+                                        <table class="mb-4">
+                                            <thead>
+                                            <tr>
+                                                <th width="25%">{{ t('validation.attributes.upc') }}</th>
+                                                <th width="25%">{{ t('validation.attributes.name') }}</th>
+                                                <th width="25%">{{ t('validation.attributes.serial') }}</th>
+                                                <th width="25%">{{ t('validation.attributes.location') }}</th>
+                                                <th width="5%"></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        id="newProduct_upc"
+                                                        name="newProduct_upc"
+                                                        class="form-control"
+                                                        :class="{'is-invalid': errors.has('newProduct_upc', 'product')}"
+                                                        v-model="newProduct.upc"
+                                                        v-validate
+                                                        data-vv-rules="required"
+                                                        data-vv-scope="product"
+                                                    >
+
+                                                    <span class="invalid-feedback d-block" role="alert" v-if="errors.firstByRule('newProduct_upc', 'required', 'product')">
+                                                        <strong>{{ t('validation.required', {'attribute': 'upc'}) }}</strong>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        id="newProduct_name"
+                                                        name="newProduct_name"
+                                                        class="form-control"
+                                                        :class="{'is-invalid': errors.has('newProduct_name', 'product')}"
+                                                        v-model="newProduct.name"
+                                                        v-validate
+                                                        data-vv-rules="required"
+                                                        data-vv-scope="product"
+                                                    >
+
+                                                    <span class="invalid-feedback d-block" role="alert" v-if="errors.firstByRule('newProduct_name', 'required', 'product')">
+                                                        <strong>{{ t('validation.required', {'attribute': 'name'}) }}</strong>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" v-model="newProduct.serial">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" v-model="newProduct.location">
+                                                </td>
+                                                <td>
+                                                    <i v-if="newProduct.loading" class="spinner-border spinner-border-sm"></i>
+
+                                                    <button v-else type="button" class="btn btn-success" @click="createProduct()">
+                                                        <i class="fa fa-save"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         <div class="upc-table-container">
@@ -426,6 +506,14 @@
                     error: false,
                     physical_inventory_movements: []
                 },
+                newProduct: {
+                    upc: null,
+                    name: null,
+                    serial: null,
+                    location: null,
+                    loading: false,
+                    show: false
+                },
                 productDetail: {
                     product: null,
                     physical_inventory_movements: []
@@ -510,6 +598,25 @@
                 }
             },
 
+            createProduct() {
+                this.$validator.validateAll('product').then(res => {
+
+                    this.newProduct.loading = true;
+
+                    ApiService.post('/warehouse/product', this.newProduct)
+                        .then(res => {
+
+                            if (res.data.success) {
+                                this.newUPC.upc = this.newProduct.upc;
+                                this.addProduct();
+                            }
+                        })
+                        .catch(err => {
+                            this.newProduct.loading = false;
+                        })
+                })
+            },
+
             openProductDetail(product) {
                 this.productDetail = {
                     product: {...product},
@@ -556,6 +663,14 @@
                     .catch(err => {
                         this.newUPC.loadingInventory = false;
                     })
+            },
+
+            showNewProductForm() {
+                this.newProduct.show = true;
+                this.newProduct.upc = this.newUPC.upc;
+                window.setTimeout(() => {
+                    document.querySelector('#newProduct_name').focus();
+                }, 500)
             }
         },
 
@@ -572,6 +687,7 @@
                     } else {
                         products.push({
                             ...movement.product,
+                            id: movement.id,
                             digital: movement.qty,
                             physical: 0
                         })
@@ -587,10 +703,15 @@
                     } else {
                         products.push({
                             ...movement.product,
+                            id: movement.id,
                             digital: 0,
                             physical: movement.qty
                         })
                     }
+                });
+
+                products.sort((a, b) => {
+                    return b.id - a.id;
                 });
 
                 return products;
@@ -600,6 +721,14 @@
         watch: {
             "newUPC.upc"(old, value) {
                 this.newUPC.error = false;
+                this.newProduct = {
+                    upc: null,
+                    name: null,
+                    serial: null,
+                    location: null,
+                    loading: false,
+                    show: false
+                };
             }
         }
     }

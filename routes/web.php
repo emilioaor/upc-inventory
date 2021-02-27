@@ -49,6 +49,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('user/config', [\App\Http\Controllers\UserController::class, 'updateConfig'])->name('user.updateConfig');
 
         Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
+        Route::resource('product', \App\Http\Controllers\ProductController::class);
     });
 
 });

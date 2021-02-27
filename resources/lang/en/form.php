@@ -28,5 +28,6 @@ return [
     'template' => 'Template',
     'download' => 'Download',
     'startInventoryCrossover' => 'Start inventory crossover',
-    'upcNotExists' => 'UPC not exists in this inventory'
+    'upcNotExists' => 'UPC not exists in this inventory',
+    'addNewProduct' => 'Add new product'
 ];
