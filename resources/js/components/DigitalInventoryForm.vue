@@ -687,7 +687,7 @@
                     } else {
                         products.push({
                             ...movement.product,
-                            id: movement.id,
+                            order: movement.id,
                             digital: movement.qty,
                             physical: 0
                         })
@@ -703,7 +703,7 @@
                     } else {
                         products.push({
                             ...movement.product,
-                            id: movement.id,
+                            order: movement.id,
                             digital: 0,
                             physical: movement.qty
                         })
@@ -711,7 +711,7 @@
                 });
 
                 products.sort((a, b) => {
-                    return b.id - a.id;
+                    return b.order - a.order;
                 });
 
                 return products;
