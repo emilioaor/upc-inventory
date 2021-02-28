@@ -86,6 +86,19 @@ class DigitalInventory extends Model
     }
 
     /**
+     * Digital inventory observations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function digitalInventoryObservations()
+    {
+        return $this->hasMany(DigitalInventoryObservation::class)
+            ->with(['user'])
+            ->orderBy('id', 'DESC')
+        ;
+    }
+
+    /**
      * Attach document
      *
      * @param string $base64

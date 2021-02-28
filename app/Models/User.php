@@ -131,4 +131,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(InventoryMovement::class);
     }
+
+    /**
+     * Digital inventory observations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function digitalInventoryObservations()
+    {
+        return $this->hasMany(DigitalInventoryObservation::class);
+    }
 }

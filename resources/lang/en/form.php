@@ -29,5 +29,6 @@ return [
     'download' => 'Download',
     'startInventoryCrossover' => 'Start inventory crossover',
     'upcNotExists' => 'UPC not exists in this inventory',
-    'addNewProduct' => 'Add new product'
+    'addNewProduct' => 'Add new product',
+    'observations' => 'Observations'
 ];

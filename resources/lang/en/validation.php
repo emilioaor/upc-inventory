@@ -170,7 +170,8 @@ return [
         'serial' => 'Serial',
         'inventory_crossover_enabled' => 'Inventory crossover enabled?',
         'date' => 'Date',
-        'location' => 'Location'
+        'location' => 'Location',
+        'observation' => 'Observation'
     ],
 
 ];

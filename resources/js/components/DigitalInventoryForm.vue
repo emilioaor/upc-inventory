@@ -121,11 +121,62 @@
 
                     </div>
 
-                    <div class="card mt-3" v-if="editData">
-                        <div class="card-header bg-secondary">
-                            {{ t('form.inventory') }}
+                    <div class="card" v-if="editData">
+                        <div class="card-header d-flex bg-secondary pointer" @click="accordion.observation = !accordion.observation">
+                            <div class="col-8">
+                                <i class="fa fa-comment"></i>
+                                {{ t('form.observations') }}
+                            </div>
+                            <div class="text-right col-4">
+                                <i class="fa fa-caret-up" v-if="accordion.observation"></i>
+                                <i class="fa fa-caret-down" v-else></i>
+                            </div>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body" v-show="accordion.observation">
+
+                            <label for="observation">{{ t('validation.attributes.observation') }}</label>
+                            <div class="form-group">
+                                <textarea
+                                        name="observation"
+                                        id="observation"
+                                        class="form-control"
+                                        cols="30"
+                                        rows="3"
+                                        v-model="newObservation.content"
+                                ></textarea>
+                            </div>
+
+                            <i v-if="newObservation.loading" class="spinner-border spinner-border-sm"></i>
+                            <button v-else type="button" class="btn btn-success" @click="addObservation()">
+                                <i class="fa fa-save"></i>
+                                {{ t('form.save') }}
+                            </button>
+
+                            <div v-for="observation in form.digital_inventory_observations">
+                                <hr>
+                                <div>
+                                    <small>
+                                        <strong>{{ observation.created_at | date(true) }}</strong> -
+                                        {{ observation.user.name }}
+                                    </small>
+                                </div>
+                                <div v-html="observation.content.replace(/(?:\r\n|\r|\n)/g, '<br />')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3" v-if="editData">
+                        <div class="card-header d-flex bg-secondary pointer" @click="accordion.inventory = !accordion.inventory">
+                            <div class="col-8">
+                                <i class="fa fa-list-alt"></i>
+                                {{ t('form.inventory') }}
+                            </div>
+                            <div class="text-right col-4">
+                                <i class="fa fa-caret-up" v-if="accordion.inventory"></i>
+                                <i class="fa fa-caret-down" v-else></i>
+                            </div>
+                        </div>
+                        <div class="card-body" v-show="accordion.inventory">
 
                             <table class="table table-responsive">
                                 <thead>
@@ -493,6 +544,7 @@
                     file: null,
                     digital_inventory_movements: [],
                     physical_inventory_movements: [],
+                    digital_inventory_observations: [],
                     inventory_crossover_enabled: false
                 },
                 modal: {
@@ -517,6 +569,14 @@
                 productDetail: {
                     product: null,
                     physical_inventory_movements: []
+                },
+                accordion: {
+                    observation: false,
+                    inventory: true
+                },
+                newObservation: {
+                    content: null,
+                    loading: false
                 }
             }
         },
@@ -671,6 +731,27 @@
                 window.setTimeout(() => {
                     document.querySelector('#newProduct_name').focus();
                 }, 500)
+            },
+
+            addObservation() {
+                if (this.newObservation.content) {
+
+                    this.newObservation.loading = true;
+
+                    ApiService.post('/warehouse/inventory/' + this.form.uuid + '/observation', {
+                        content: this.newObservation.content
+                    }).then(res => {
+
+                        if (res.data.success) {
+                            this.newObservation.loading = false;
+                            this.newObservation.content = null;
+                            this.form.digital_inventory_observations = res.data.data;
+                        }
+
+                    }).catch(err => {
+                        this.newObservation.loading = false;
+                    })
+                }
             }
         },
 

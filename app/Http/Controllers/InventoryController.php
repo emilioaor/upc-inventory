@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\DigitalInventoryUpdated;
 use App\Models\DigitalInventory;
+use App\Models\DigitalInventoryObservation;
 use App\Models\InventoryMovement;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -96,7 +97,8 @@ class InventoryController extends Controller
             ->with([
                 'digitalInventoryMovements.product',
                 'physicalInventoryMovements.product',
-                'user'
+                'user',
+                'digitalInventoryObservations'
             ])
             ->uuid($id)
             ->where('inventory_crossover_enabled', true)
@@ -138,5 +140,25 @@ class InventoryController extends Controller
         broadcast(new DigitalInventoryUpdated($inventoryMovement->digital_inventory_id));
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Add observation
+     *
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function observation(Request $request, $id)
+    {
+        $digitalInventory = DigitalInventory::query()->uuid($id)->firstOrFail();
+
+        $observation = new DigitalInventoryObservation($request->all());
+        $observation->digital_inventory_id = $digitalInventory->id;
+        $observation->save();
+
+        $observations = $digitalInventory->digitalInventoryObservations()->get();
+
+        return response()->json(['success' => true, 'data' => $observations]);
     }
 }

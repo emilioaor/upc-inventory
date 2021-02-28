@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('user/config', [\App\Http\Controllers\UserController::class, 'config'])->name('user.config');
         Route::put('user/config', [\App\Http\Controllers\UserController::class, 'updateConfig'])->name('user.updateConfig');
 
+        Route::post('inventory/{inventory}/observation', [\App\Http\Controllers\InventoryController::class, 'observation']);
         Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
         Route::resource('product', \App\Http\Controllers\ProductController::class);
     });
