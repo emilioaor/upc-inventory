@@ -661,19 +661,21 @@
             createProduct() {
                 this.$validator.validateAll('product').then(res => {
 
-                    this.newProduct.loading = true;
+                    if (res) {
+                        this.newProduct.loading = true;
 
-                    ApiService.post('/warehouse/product', this.newProduct)
-                        .then(res => {
+                        ApiService.post('/warehouse/product', this.newProduct)
+                            .then(res => {
 
-                            if (res.data.success) {
-                                this.newUPC.upc = this.newProduct.upc;
-                                this.addProduct();
-                            }
-                        })
-                        .catch(err => {
-                            this.newProduct.loading = false;
-                        })
+                                if (res.data.success) {
+                                    this.newUPC.upc = this.newProduct.upc;
+                                    this.addProduct();
+                                }
+                            })
+                            .catch(err => {
+                                this.newProduct.loading = false;
+                            })
+                    }
                 })
             },
 
