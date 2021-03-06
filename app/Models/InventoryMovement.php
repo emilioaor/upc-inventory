@@ -18,7 +18,19 @@ class InventoryMovement extends Model
     const TYPE_DIGITAL = 'digital';
     const TYPE_PHYSICAL = 'physical';
 
-    protected $fillable = ['digital_inventory_id', 'product_id', 'type', 'qty'];
+    /** Scan methods */
+    const SCAN_METHOD_UNITS = 'units';
+    const SCAN_METHOD_BOXES = 'boxes';
+
+    protected $fillable = [
+        'digital_inventory_id',
+        'product_id',
+        'type',
+        'qty',
+        'scan_method',
+        'qty_per_box',
+        'boxes_qty'
+    ];
 
     /**
      * InventoryMovement constructor.

@@ -183,7 +183,7 @@
                                     <tr>
                                         <th>{{ t('validation.attributes.product') }}</th>
                                         <th>{{ t('validation.attributes.upc') }}</th>
-                                        <th>{{ t('validation.attributes.serial') }}</th>
+                                        <th>{{ t('validation.attributes.sku') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.digital') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.physical') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.diff') }}</th>
@@ -194,7 +194,7 @@
                                     <tr v-for="product in inventoryUnified">
                                         <td>{{ product.name }}</td>
                                         <td>{{ product.upc }}</td>
-                                        <td>{{ product.serial }}</td>
+                                        <td>{{ product.sku }}</td>
                                         <td class="text-center">{{ product.digital }}</td>
                                         <td class="text-center">{{ product.physical }}</td>
                                         <td class="text-center">{{ product.physical - product.digital }}</td>
@@ -264,7 +264,7 @@
 
         <!-- Modal -->
         <div class="modal fade" id="modalInventory" tabindex="-1" role="dialog" aria-labelledby="modalInventory" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header pb-0 pt-2">
                         <div></div>
@@ -276,9 +276,38 @@
 
 
                         <div class="row">
+                            <div class="col-lg-3">
+                                <label>
+                                    {{ t('validation.attributes.scanMethod') }}
+                                </label>
+                                <div class="mb-3">
+                                    <input
+                                        type="radio"
+                                        name="scan_method"
+                                        value="units"
+                                        v-model="newUPC.scan_method"> {{ t('form.units') }} |
+
+                                    <input
+                                        type="radio"
+                                        name="scan_method"
+                                        value="boxes"
+                                        v-model="newUPC.scan_method"> {{ t('form.boxes') }}
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 mb-3">
+                                <template v-if="newUPC.scan_method === 'boxes'">
+                                    <label>
+                                        {{ t('validation.attributes.qtyPerBox') }}
+                                    </label>
+
+                                    <input type="number" class="form-control" v-model="newUPC.qty_per_box">
+                                </template>
+                            </div>
+
                             <div class="col-lg-5">
                                 <label>
-                                    {{ t('validation.attributes.upc') }}
+                                    {{ t('validation.attributes.upc_or_sku') }}
                                     <i class="fa fa-barcode"></i>
                                 </label>
                                 <div class="input-group mb-3">
@@ -326,10 +355,11 @@
                                         <table class="mb-4">
                                             <thead>
                                             <tr>
-                                                <th width="25%">{{ t('validation.attributes.upc') }}</th>
-                                                <th width="25%">{{ t('validation.attributes.name') }}</th>
-                                                <th width="25%">{{ t('validation.attributes.serial') }}</th>
-                                                <th width="25%">{{ t('validation.attributes.location') }}</th>
+                                                <th width="20%">{{ t('validation.attributes.upc') }}</th>
+                                                <th width="20%">{{ t('validation.attributes.sku') }}</th>
+                                                <th width="20%">{{ t('validation.attributes.name') }}</th>
+                                                <th width="20%">{{ t('validation.attributes.serial') }}</th>
+                                                <th width="20%">{{ t('validation.attributes.location') }}</th>
                                                 <th width="5%"></th>
                                             </tr>
                                             </thead>
@@ -341,15 +371,28 @@
                                                         id="newProduct_upc"
                                                         name="newProduct_upc"
                                                         class="form-control"
-                                                        :class="{'is-invalid': errors.has('newProduct_upc', 'product')}"
+                                                        :class="{'is-invalid': errors.has('newProduct_upc_or_sku', 'product')}"
                                                         v-model="newProduct.upc"
-                                                        v-validate
-                                                        data-vv-rules="required"
-                                                        data-vv-scope="product"
                                                     >
 
-                                                    <span class="invalid-feedback d-block" role="alert" v-if="errors.firstByRule('newProduct_upc', 'required', 'product')">
-                                                        <strong>{{ t('validation.required', {'attribute': 'upc'}) }}</strong>
+                                                    <input v-if="!newProduct.upc && !newProduct.sku" type="hidden" name="newProduct_upc_or_sku" v-validate data-vv-rules="required" data-vv-scope="product">
+
+                                                    <span class="invalid-feedback d-block" role="alert" v-if="errors.firstByRule('newProduct_upc_or_sku', 'required', 'product')">
+                                                        <strong>{{ t('validation.required', {'attribute': 'upc_or_sku'}) }}</strong>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        type="text"
+                                                        id="newProduct_sku"
+                                                        name="newProduct_sku"
+                                                        class="form-control"
+                                                        :class="{'is-invalid': errors.has('newProduct_upc_or_sku', 'product')}"
+                                                        v-model="newProduct.sku"
+                                                    >
+
+                                                    <span class="invalid-feedback d-block" role="alert" v-if="errors.firstByRule('newProduct_upc_or_sku', 'required', 'product')">
+                                                        <strong>{{ t('validation.required', {'attribute': 'upc_or_sku'}) }}</strong>
                                                     </span>
                                                 </td>
                                                 <td>
@@ -396,7 +439,10 @@
                                 <thead>
                                 <tr>
                                     <th width="1%">{{ t('validation.attributes.upc') }}</th>
+                                    <th width="1%">{{ t('validation.attributes.sku') }}</th>
                                     <th>{{ t('validation.attributes.product') }}</th>
+                                    <th width="15%" class="text-center">{{ t('validation.attributes.boxes') }}</th>
+                                    <th width="15%" class="text-center">{{ t('validation.attributes.qtyPerBox') }}</th>
                                     <th width="15%" class="text-center">{{ t('validation.attributes.qty') }}</th>
                                     <th width="1%"></th>
                                 </tr>
@@ -404,17 +450,49 @@
                                 <tbody>
                                 <tr v-for="(movement, i) in newUPC.physical_inventory_movements">
                                     <td>{{ movement.product.upc }}</td>
+                                    <td>{{ movement.product.sku }}</td>
                                     <td>{{ movement.product.name }}</td>
                                     <td class="text-center">
 
-                                        <input
-                                            type="number"
-                                            :id="'movement-product-' + i"
-                                            class="form-control"
-                                            v-model="movement.qty"
-                                            @blur="changeQTY(i)"
-                                            :disabled="newUPC.loadingInventory === movement.id"
-                                        >
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-' + i"
+                                                    class="form-control"
+                                                    v-model="movement.boxes_qty"
+                                                    @blur="changeQTY(i)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                            >
+                                        </template>
+                                    </td>
+                                    <td class="text-center">
+
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-qty-per-box' + i"
+                                                    class="form-control"
+                                                    v-model="movement.qty_per_box"
+                                                    @blur="changeQTY(i)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                            >
+                                        </template>
+                                    </td>
+                                    <td class="text-center">
+
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            {{ movement.qty }}
+                                        </template>
+                                        <template v-else>
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-qty' + i"
+                                                    class="form-control"
+                                                    v-model="movement.qty"
+                                                    @blur="changeQTY(i)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                            >
+                                        </template>
                                     </td>
                                     <td>
                                         <i v-if="newUPC.loadingInventory === movement.id" class="spinner-border spinner-border-sm"></i>
@@ -453,7 +531,16 @@
                         <h5>
                             <strong>
                                 {{ productDetail.product.name }}
-                                <small>({{ productDetail.product.upc }})</small>
+                                <small>
+                                    <template v-if="productDetail.product.upc">
+                                        {{ t('validation.attributes.upc') }}:
+                                        {{ productDetail.product.upc }}
+                                    </template>
+                                    <template v-if="productDetail.product.sku">
+                                        {{ t('validation.attributes.sku') }}:
+                                        {{ productDetail.product.sku }}
+                                    </template>
+                                </small>
                             </strong>
                         </h5>
 
@@ -553,6 +640,8 @@
                 },
                 newUPC: {
                     upc: null,
+                    scan_method: 'units',
+                    qty_per_box: null,
                     loading: false,
                     loadingInventory: null,
                     error: false,
@@ -560,6 +649,7 @@
                 },
                 newProduct: {
                     upc: null,
+                    sku: null,
                     name: null,
                     serial: null,
                     location: null,
@@ -630,13 +720,15 @@
             },
 
             addProduct() {
-                if (this.newUPC.upc) {
+                if (this.newUPC.upc && (this.newUPC.scan_method === 'units' || parseInt(this.newUPC.qty_per_box))) {
 
                     this.newUPC.loading = true;
 
                     ApiService.post('/warehouse/inventory', {
                         upc: this.newUPC.upc,
-                        digital_inventory_id: this.form.id
+                        digital_inventory_id: this.form.id,
+                        scan_method: this.newUPC.scan_method,
+                        qty_per_box: this.newUPC.qty_per_box
                     })
                         .then(res => {
 
@@ -668,7 +760,12 @@
                             .then(res => {
 
                                 if (res.data.success) {
-                                    this.newUPC.upc = this.newProduct.upc;
+                                    if (this.newProduct.upc) {
+                                        this.newUPC.upc = this.newProduct.upc;
+                                    } else {
+                                        this.newUPC.upc = this.newProduct.sku;
+                                    }
+
                                     this.addProduct();
                                 }
                             })
@@ -689,16 +786,29 @@
             changeQTY(index) {
                 const movement = this.newUPC.physical_inventory_movements[index];
                 const qty = parseInt(movement.qty);
+                const qtyPerBox = parseInt(movement.qty_per_box);
+                const boxesQty = parseInt(movement.boxes_qty);
 
-                if (qty && qty > 0) {
+                if (
+                        qty && qty > 0 &&
+                        (movement.scan_method === 'units' || (qtyPerBox && qtyPerBox > 0 && boxesQty && boxesQty > 0))
+                    ) {
 
                     this.newUPC.loadingInventory = movement.id;
 
-                    ApiService.put('/warehouse/inventory/' + movement.id, {qty})
+                    ApiService.put('/warehouse/inventory/' + movement.id, {
+                        qty,
+                        qty_per_box: qtyPerBox,
+                        boxes_qty: boxesQty
+                    })
                         .then(res => {
 
                             if (res.data.success) {
                                 this.newUPC.loadingInventory = null;
+
+                                if (movement.scan_method === 'boxes') {
+                                    movement.qty = movement.qty_per_box * movement.boxes_qty;
+                                }
                             }
 
                         }).catch(err => {
@@ -706,8 +816,16 @@
                         });
 
                 } else {
-                    this.newUPC.physical_inventory_movements[index].qty = 1;
-                    document.querySelector('#movement-product-' + index).focus();
+                    if (! qty) {
+                        this.newUPC.physical_inventory_movements[index].qty = 1;
+                    }
+                    if (! boxesQty) {
+                        this.newUPC.physical_inventory_movements[index].boxes_qty = 1;
+                    }
+                    if (! qtyPerBox) {
+                        this.newUPC.physical_inventory_movements[index].qty_per_box = 1;
+                    }
+                    //document.querySelector('#movement-product-qty' + index).focus();
                 }
             },
 

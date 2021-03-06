@@ -20,6 +20,9 @@ class CreateInventoryMovementsTable extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->foreignId('user_id')->constrained('users');
             $table->enum('type', ['digital', 'physical']);
+            $table->enum('scan_method', ['units', 'boxes'])->nullable();
+            $table->integer('qty_per_box')->nullable();
+            $table->integer('boxes_qty')->nullable();
             $table->integer('qty');
             $table->timestamps();
             $table->softDeletes();

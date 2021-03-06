@@ -17,7 +17,8 @@ class CreateProductsTable extends Migration
             $table->id();
             $table->uuid('uuid');
             $table->string('name');
-            $table->string('upc')->unique();
+            $table->string('upc')->unique()->nullable();
+            $table->string('sku')->unique()->nullable();
             $table->string('serial')->unique()->nullable();
             $table->string('location')->nullable();
             $table->timestamps();

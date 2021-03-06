@@ -34,7 +34,7 @@ class DigitalInventoryImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $row) {
 
-            $product = Product::query()->where('upc', $row['upc'])->first();
+            $product = Product::query()->upcOrSku($row['upc'], $row['sku'])->first();
 
             if (!$product) {
                 $product = new Product($row->toArray());
@@ -62,14 +62,17 @@ class DigitalInventoryImport implements ToCollection, WithHeadingRow
     {
         if (
             isset($row['upc']) ||
+            isset($row['sku']) ||
             isset($row['serial']) ||
             isset($row['name']) ||
             isset($row['location']) ||
             isset($row['inventory'])
         ) {
 
+            $row['upc_or_sku'] = $row['upc'] . $row['sku'];
+
             $validator = Validator::make($row, [
-                'upc' => 'required',
+                'upc_or_sku' => 'required',
                 'name' => 'required',
                 'inventory' => 'required|numeric'
             ]);

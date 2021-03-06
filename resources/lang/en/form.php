@@ -30,5 +30,7 @@ return [
     'startInventoryCrossover' => 'Start inventory crossover',
     'upcNotExists' => 'UPC not exists in this inventory',
     'addNewProduct' => 'Add new product',
-    'observations' => 'Observations'
+    'observations' => 'Observations',
+    'units' => 'Units',
+    'boxes' => 'Boxes'
 ];

@@ -167,11 +167,16 @@ return [
         'physical' => 'Physical',
         'diff' => 'Diff',
         'upc' => 'UPC',
+        'sku' => 'SKU',
         'serial' => 'Serial',
         'inventory_crossover_enabled' => 'Inventory crossover enabled?',
         'date' => 'Date',
         'location' => 'Location',
-        'observation' => 'Observation'
+        'observation' => 'Observation',
+        'scanMethod' => 'Scan method',
+        'upc_or_sku' => 'UPC or SKU',
+        'qtyPerBox' => 'Units per box',
+        'boxes' => 'Boxes'
     ],
 
 ];

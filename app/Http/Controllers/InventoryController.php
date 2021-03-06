@@ -52,17 +52,26 @@ class InventoryController extends Controller
             ->where('inventory_crossover_enabled', true)
             ->firstOrFail()
         ;
-        $product = Product::query()->where('upc', $request->upc)->first();
+        $product = Product::query()->upcOrSku($request->upc, $request->upc)->first();
 
         if (! $product) {
-            return response()->json(['success' => false, 'data' => $product]);
+            return response()->json(['success' => false, 'data' => null]);
         }
 
         $inventoryMovement = new InventoryMovement();
         $inventoryMovement->digital_inventory_id = $digitalInventory->id;
         $inventoryMovement->product_id = $product->id;
         $inventoryMovement->type = InventoryMovement::TYPE_PHYSICAL;
-        $inventoryMovement->qty = 1;
+        $inventoryMovement->scan_method = $request->scan_method;
+
+        if ($request->scan_method === InventoryMovement::SCAN_METHOD_BOXES) {
+            $inventoryMovement->qty_per_box = $request->qty_per_box;
+            $inventoryMovement->boxes_qty = 1;
+            $inventoryMovement->qty = $request->qty_per_box;
+        } else {
+            $inventoryMovement->qty = 1;
+        }
+
         $inventoryMovement->save();
 
         $inventoryMovement->product = $inventoryMovement->product;
@@ -118,7 +127,17 @@ class InventoryController extends Controller
     public function update(Request $request, $id)
     {
         $inventoryMovement = InventoryMovement::query()->findOrFail($id);
-        $inventoryMovement->qty = $request->qty;
+
+        if ($inventoryMovement->scan_method === InventoryMovement::SCAN_METHOD_BOXES) {
+
+            $inventoryMovement->qty_per_box = $request->qty_per_box;
+            $inventoryMovement->boxes_qty = $request->boxes_qty;
+            $inventoryMovement->qty = $inventoryMovement->qty_per_box * $inventoryMovement->boxes_qty;
+
+        } else {
+            $inventoryMovement->qty = $request->qty;
+        }
+
         $inventoryMovement->save();
 
         broadcast(new DigitalInventoryUpdated($inventoryMovement->digital_inventory_id));

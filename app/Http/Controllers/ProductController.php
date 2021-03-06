@@ -35,8 +35,12 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = new Product($request->all());
-        $product->save();
+        $product = Product::query()->upcOrSku($request->get('upc'), $request->get('sku'))->first();
+
+        if (! $product) {
+            $product = new Product($request->all());
+            $product->save();
+        }
 
         return response()->json(['success' => true]);
     }
