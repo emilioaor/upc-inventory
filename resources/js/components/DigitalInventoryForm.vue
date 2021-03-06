@@ -285,12 +285,14 @@
                                         type="radio"
                                         name="scan_method"
                                         value="units"
+                                        @change="newUPC.qty_per_box = null"
                                         v-model="newUPC.scan_method"> {{ t('form.units') }} |
 
                                     <input
                                         type="radio"
                                         name="scan_method"
                                         value="boxes"
+                                        @change="newUPC.qty_per_box = null"
                                         v-model="newUPC.scan_method"> {{ t('form.boxes') }}
                                 </div>
                             </div>
@@ -720,7 +722,30 @@
             },
 
             addProduct() {
+
                 if (this.newUPC.upc && (this.newUPC.scan_method === 'units' || parseInt(this.newUPC.qty_per_box))) {
+
+                    if (this.newUPC.physical_inventory_movements.length) {
+
+                        const lastMovement = this.newUPC.physical_inventory_movements[0];
+
+                        if (
+                            (
+                                (lastMovement.product.upc && lastMovement.product.upc === this.newUPC.upc) ||
+                                (lastMovement.product.sku && lastMovement.product.sku === this.newProduct.upc)
+                            ) && lastMovement.scan_method === this.newUPC.scan_method
+                        ) {
+                            if (lastMovement.scan_method === 'boxes') {
+                                lastMovement.boxes_qty++;
+                            } else {
+                                lastMovement.qty++;
+                            }
+
+                            this.newUPC.upc = null;
+
+                            return this.changeQTY(0);
+                        }
+                    }
 
                     this.newUPC.loading = true;
 
