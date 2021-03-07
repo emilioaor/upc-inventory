@@ -69,6 +69,8 @@ class InventoryController extends Controller
             $inventoryMovement->boxes_qty = 1;
             $inventoryMovement->qty = $request->qty_per_box;
         } else {
+            $inventoryMovement->qty_per_box = null;
+            $inventoryMovement->boxes_qty = null;
             $inventoryMovement->qty = 1;
         }
 

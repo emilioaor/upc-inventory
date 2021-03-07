@@ -569,6 +569,69 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal -->
+        <button
+                type="button"
+                class="d-none"
+                id="openConfirmationChangeProduct"
+                data-toggle="modal"
+                data-target="#modalConfirmationChangeProduct"
+        ></button>
+        <div class="modal fade" id="modalConfirmationChangeProduct" tabindex="-1" role="dialog" aria-labelledby="modalConfirmationChangeProduct" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-body">
+
+                        <h3>{{ t('form.confirmationChangeProduct') }}</h3>
+
+                        <table class="table mt-4">
+                            <thead>
+                                <tr>
+                                    <th width="33%">{{ t('validation.attributes.upc') }} / {{ t('validation.attributes.sku') }}</th>
+                                    <th width="33%">{{ t('validation.attributes.scanMethod') }}</th>
+                                    <th width="33%">{{ t('validation.attributes.qtyPerBox') }}</th>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td>{{ newUPC.upc }}</td>
+                                <td>
+                                    <input
+                                            type="radio"
+                                            name="scan_method_modal"
+                                            value="units"
+                                            @change="newUPC.qty_per_box = null"
+                                            v-model="newUPC.scan_method"> {{ t('form.units') }} |
+
+                                    <input
+                                            type="radio"
+                                            name="scan_method_modal"
+                                            value="boxes"
+                                            @change="newUPC.qty_per_box = null"
+                                            v-model="newUPC.scan_method"> {{ t('form.boxes') }}
+                                </td>
+                                <td>
+                                    <template v-if="newUPC.scan_method === 'boxes'">
+                                        <input type="number" class="form-control" v-model="newUPC.qty_per_box">
+                                    </template>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="text-center">
+                            <button class="btn btn-success btn-lg" type="button" data-dismiss="modal" @click="createMovement()">
+                                {{ t('form.accept') }}
+                            </button>
+
+                            <button class="btn btn-secondary btn-lg" type="button" data-dismiss="modal" @click="cancelConfirmation()">
+                                {{ t('form.cancel') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -728,12 +791,14 @@
                     if (this.newUPC.physical_inventory_movements.length) {
 
                         const lastMovement = this.newUPC.physical_inventory_movements[0];
+                        const isSameProduct =
+                            (lastMovement.product.upc && lastMovement.product.upc === this.newUPC.upc) ||
+                            (lastMovement.product.sku && lastMovement.product.sku === this.newUPC.upc);
 
                         if (
-                            (
-                                (lastMovement.product.upc && lastMovement.product.upc === this.newUPC.upc) ||
-                                (lastMovement.product.sku && lastMovement.product.sku === this.newProduct.upc)
-                            ) && lastMovement.scan_method === this.newUPC.scan_method
+                            isSameProduct &&
+                            lastMovement.scan_method === this.newUPC.scan_method &&
+                            lastMovement.qty_per_box == this.newUPC.qty_per_box
                         ) {
                             if (lastMovement.scan_method === 'boxes') {
                                 lastMovement.boxes_qty++;
@@ -745,34 +810,50 @@
 
                             return this.changeQTY(0);
                         }
+
+                        if (! isSameProduct) {
+                            return this.changeProductConfirmation();
+                        }
                     }
 
-                    this.newUPC.loading = true;
-
-                    ApiService.post('/warehouse/inventory', {
-                        upc: this.newUPC.upc,
-                        digital_inventory_id: this.form.id,
-                        scan_method: this.newUPC.scan_method,
-                        qty_per_box: this.newUPC.qty_per_box
-                    })
-                        .then(res => {
-
-                            if (! res.data.data) {
-                                this.newUPC.error = true;
-                            } else {
-                                this.newUPC.physical_inventory_movements.unshift({
-                                    ...res.data.data
-                                });
-                                this.newUPC.upc = null;
-                                document.querySelector('#newUPC').focus();
-                            }
-
-                            this.newUPC.loading = false;
-                        })
-                        .catch(err => {
-                            this.newUPC.loading = false;
-                        })
+                    this.createMovement();
                 }
+            },
+
+            changeProductConfirmation() {
+                document.querySelector('#openConfirmationChangeProduct').click();
+            },
+
+            cancelConfirmation() {
+                this.newUPC.upc = null;
+            },
+
+            createMovement() {
+                this.newUPC.loading = true;
+
+                ApiService.post('/warehouse/inventory', {
+                    upc: this.newUPC.upc,
+                    digital_inventory_id: this.form.id,
+                    scan_method: this.newUPC.scan_method,
+                    qty_per_box: this.newUPC.qty_per_box
+                })
+                    .then(res => {
+
+                        if (! res.data.data) {
+                            this.newUPC.error = true;
+                        } else {
+                            this.newUPC.physical_inventory_movements.unshift({
+                                ...res.data.data
+                            });
+                            this.newUPC.upc = null;
+                            document.querySelector('#newUPC').focus();
+                        }
+
+                        this.newUPC.loading = false;
+                    })
+                    .catch(err => {
+                        this.newUPC.loading = false;
+                    })
             },
 
             createProduct() {
@@ -979,5 +1060,9 @@
         max-height: 65vh;
         overflow: auto;
         border-top: solid 1px #1A3660;
+    }
+
+    #modalConfirmationChangeProduct {
+        background-color: rgba(0,0,0,0.5);
     }
 </style>

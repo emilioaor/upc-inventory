@@ -14,6 +14,8 @@ return [
     'areYouSure' => 'Are you sure?',
     'yes' => 'Yes',
     'no' => 'No',
+    'accept' => 'Accept',
+    'cancel' => 'Cancel',
     'report' => 'Report',
     'all' => 'All',
     'print' => 'Print',
@@ -32,5 +34,11 @@ return [
     'addNewProduct' => 'Add new product',
     'observations' => 'Observations',
     'units' => 'Units',
-    'boxes' => 'Boxes'
+    'boxes' => 'Boxes',
+    'confirmationChangeProduct' => 'You are trying to add a product for another UPC / SKU. Are you sure?',
+
+    'scanMethod' => [
+        'units' => 'Units',
+        'boxes' => 'Boxes'
+    ]
 ];
