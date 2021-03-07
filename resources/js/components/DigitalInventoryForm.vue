@@ -632,6 +632,8 @@
                 </div>
             </div>
         </div>
+
+        <audio id="audioError" src="/audio/error.mp3"></audio>
     </div>
 </template>
 
@@ -822,6 +824,7 @@
 
             changeProductConfirmation() {
                 document.querySelector('#openConfirmationChangeProduct').click();
+                document.querySelector('#audioError').play();
             },
 
             cancelConfirmation() {
@@ -841,6 +844,7 @@
 
                         if (! res.data.data) {
                             this.newUPC.error = true;
+                            document.querySelector('#audioError').play();
                         } else {
                             this.newUPC.physical_inventory_movements.unshift({
                                 ...res.data.data
@@ -931,6 +935,7 @@
                     if (! qtyPerBox) {
                         this.newUPC.physical_inventory_movements[index].qty_per_box = 1;
                     }
+                    document.querySelector('#audioError').play();
                     //document.querySelector('#movement-product-qty' + index).focus();
                 }
             },
