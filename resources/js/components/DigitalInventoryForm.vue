@@ -520,7 +520,7 @@
 
         <!-- Modal -->
         <div class="modal fade" id="modalProductDetail" tabindex="-1" role="dialog" aria-labelledby="modalProductDetail" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content" v-if="productDetail.product">
                     <div class="modal-header pb-0 pt-2">
                         <div></div>
@@ -547,19 +547,69 @@
                         </h5>
 
                         <div class="upc-table-container mt-3">
-                            <table class="table table-striped table-responsive" v-if="productDetail.physical_inventory_movements.length">
+                            <table class="table table-striped" v-if="productDetail.physical_inventory_movements.length">
                                 <thead>
                                 <tr>
                                     <th>{{ t('validation.attributes.date') }}</th>
                                     <th>{{ t('validation.attributes.createdBy') }}</th>
-                                    <th width="1%" class="text-center pr-3">{{ t('validation.attributes.qty') }}</th>
+                                    <th width="12%" class="text-center">{{ t('validation.attributes.boxes') }}</th>
+                                    <th width="12%" class="text-center">{{ t('validation.attributes.qtyPerBox') }}</th>
+                                    <th width="12%" class="text-center">{{ t('validation.attributes.qty') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="(movement, i) in productDetail.physical_inventory_movements">
                                     <td>{{ movement.created_at | date(true) }}</td>
                                     <td>{{ movement.user.name }}</td>
-                                    <td class="text-center">{{ movement.qty }}</td>
+                                    <td class="text-center">
+
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-' + i"
+                                                    class="form-control"
+                                                    v-model="movement.boxes_qty"
+                                                    @blur="changeProductDetailQTY(movement)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                                    v-if="user.role === 'administrator' || movement.user.id === user.id"
+                                            >
+                                            <span v-else>{{ movement.boxes_qty }}</span>
+                                        </template>
+                                    </td>
+                                    <td class="text-center">
+
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-qty-per-box' + i"
+                                                    class="form-control"
+                                                    v-model="movement.qty_per_box"
+                                                    @blur="changeProductDetailQTY(movement)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                                    v-if="user.role === 'administrator' || movement.user.id === user.id"
+                                            >
+                                            <span v-else>{{ movement.qty_per_box }}</span>
+                                        </template>
+                                    </td>
+                                    <td class="text-center">
+
+                                        <template v-if="movement.scan_method === 'boxes'">
+                                            {{ movement.qty }}
+                                        </template>
+                                        <template v-else>
+                                            <input
+                                                    type="number"
+                                                    :id="'movement-product-qty' + i"
+                                                    class="form-control"
+                                                    v-model="movement.qty"
+                                                    @blur="changeProductDetailQTY(movement)"
+                                                    :disabled="newUPC.loadingInventory === movement.id"
+                                                    v-if="user.role === 'administrator' || movement.user.id === user.id"
+                                            >
+                                            <span v-else>{{ movement.qty }}</span>
+                                        </template>
+                                    </td>
+
                                 </tr>
                                 </tbody>
                             </table>
@@ -844,7 +894,6 @@
 
                         if (! res.data.data) {
                             this.newUPC.error = true;
-                            document.querySelector('#audioError').play();
                         } else {
                             this.newUPC.physical_inventory_movements.unshift({
                                 ...res.data.data
@@ -893,17 +942,62 @@
                 };
             },
 
-            changeQTY(index) {
-                const movement = this.newUPC.physical_inventory_movements[index];
+            isValidMovement(movement) {
+
                 const qty = parseInt(movement.qty);
                 const qtyPerBox = parseInt(movement.qty_per_box);
                 const boxesQty = parseInt(movement.boxes_qty);
 
                 if (
-                        qty && qty > 0 &&
-                        (movement.scan_method === 'units' || (qtyPerBox && qtyPerBox > 0 && boxesQty && boxesQty > 0))
-                    ) {
+                    qty && qty > 0 &&
+                    (movement.scan_method === 'units' || (qtyPerBox && qtyPerBox > 0 && boxesQty && boxesQty > 0))
+                ) {
 
+                    return true;
+                }
+
+                if (! qty) {
+                    this.newUPC.physical_inventory_movements[index].qty = 1;
+                }
+                if (! boxesQty) {
+                    this.newUPC.physical_inventory_movements[index].boxes_qty = 1;
+                }
+                if (! qtyPerBox) {
+                    this.newUPC.physical_inventory_movements[index].qty_per_box = 1;
+                }
+
+                return false;
+            },
+
+            changeQTY(index) {
+                const movement = this.newUPC.physical_inventory_movements[index];
+
+                if (this.isValidMovement(movement)) {
+                    this.updateMovement(movement);
+                }
+            },
+
+            changeProductDetailQTY(mv) {
+                const index = this.newUPC.physical_inventory_movements.findIndex(m => m.id === mv.id);
+
+                if (mv.user.id === this.user.id) {
+                    const movement = this.newUPC.physical_inventory_movements[index];
+
+                    movement.qty_per_box = mv.qty_per_box;
+                    movement.boxes_qty = mv.boxes_qty;
+                    movement.qty = mv.qty;
+                }
+
+                this.updateMovement(mv);
+            },
+
+            updateMovement(movement) {
+
+                if (this.isValidMovement(movement)) {
+
+                    const qty = parseInt(movement.qty);
+                    const qtyPerBox = parseInt(movement.qty_per_box);
+                    const boxesQty = parseInt(movement.boxes_qty);
                     this.newUPC.loadingInventory = movement.id;
 
                     ApiService.put('/warehouse/inventory/' + movement.id, {
@@ -922,21 +1016,8 @@
                             }
 
                         }).catch(err => {
-                            this.newUPC.loadingInventory = null;
-                        });
-
-                } else {
-                    if (! qty) {
-                        this.newUPC.physical_inventory_movements[index].qty = 1;
-                    }
-                    if (! boxesQty) {
-                        this.newUPC.physical_inventory_movements[index].boxes_qty = 1;
-                    }
-                    if (! qtyPerBox) {
-                        this.newUPC.physical_inventory_movements[index].qty_per_box = 1;
-                    }
-                    document.querySelector('#audioError').play();
-                    //document.querySelector('#movement-product-qty' + index).focus();
+                        this.newUPC.loadingInventory = null;
+                    });
                 }
             },
 
