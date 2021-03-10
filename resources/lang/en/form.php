@@ -36,6 +36,7 @@ return [
     'units' => 'Units',
     'boxes' => 'Boxes',
     'confirmationChangeProduct' => 'You are trying to add a product for another UPC / SKU. Are you sure?',
+    'filterByUPCorSKU' => 'Filter by UPC or SKU',
 
     'scanMethod' => [
         'units' => 'Units',

@@ -178,6 +178,24 @@
                         </div>
                         <div class="card-body" v-show="accordion.inventory">
 
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <div class="input-group">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default" type="button">
+                                                <i class="fa fa-filter"></i>
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            :placeholder="t('form.filterByUPCorSKU')"
+                                            v-model="filter.content"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="table table-responsive">
                                 <thead>
                                     <tr>
@@ -191,7 +209,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="product in inventoryUnified">
+                                    <tr v-for="product in inventoryUnifiedFiltered">
                                         <td>{{ product.name }}</td>
                                         <td>{{ product.upc }}</td>
                                         <td>{{ product.sku }}</td>
@@ -784,6 +802,9 @@
                 newObservation: {
                     content: null,
                     loading: false
+                },
+                filter: {
+                    content: null
                 }
             }
         },
@@ -1108,6 +1129,18 @@
                 });
 
                 return products;
+            },
+
+            inventoryUnifiedFiltered() {
+
+                if (! this.filter.content) {
+                    return this.inventoryUnified;
+                }
+
+                return this.inventoryUnified.filter(p =>
+                    (p.upc && p.upc.indexOf(this.filter.content) >= 0) ||
+                    (p.sku && p.sku.indexOf(this.filter.content) >= 0)
+                )
             }
         },
 
