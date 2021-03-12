@@ -6,6 +6,7 @@ return [
     'save' => 'Save',
     'delete' => 'Delete',
     'filter' => 'Filter',
+    'search' => 'Search',
     'showFilters' => 'Show filters',
     'total' => 'Total',
     'filtered_by' => 'Filtered by',
@@ -37,6 +38,7 @@ return [
     'boxes' => 'Boxes',
     'confirmationChangeProduct' => 'You are trying to add a product for another UPC / SKU. Are you sure?',
     'filterByUPCorSKU' => 'Filter by UPC or SKU',
+    'addSerial' => 'Add serial',
 
     'scanMethod' => [
         'units' => 'Units',

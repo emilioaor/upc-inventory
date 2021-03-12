@@ -16,9 +16,9 @@ class Product extends Model
     use UuidGeneratorTrait;
     use SearchTrait;
 
-    protected $fillable = ['name', 'upc', 'sku', 'serial', 'location'];
+    protected $fillable = ['name', 'upc', 'sku', 'location'];
 
-    protected $search_fields = ['name', 'upc', 'sku', 'serial', 'location'];
+    protected $search_fields = ['name', 'upc', 'sku', 'location'];
 
     /**
      * Inventory movements
@@ -28,6 +28,16 @@ class Product extends Model
     public function inventoryMovements()
     {
         return $this->hasMany(InventoryMovement::class);
+    }
+
+    /**
+     * Product serials
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function productSerials()
+    {
+        return $this->hasMany(ProductSerial::class)->orderBy('id', 'DESC')->with(['user']);
     }
 
     /**

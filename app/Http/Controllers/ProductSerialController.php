@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductSerial;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
-class ProductController extends Controller
+class ProductSerialController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,9 +17,22 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::query()->search($request->search)->orderBy('name')->paginate();
+        $productSerials = ProductSerial::query()
+            ->with(['product', 'user'])
+            ->search($request->search)
+            ->orderBy('id', 'DESC')
+        ;
 
-        return response()->json(['success' => true, 'data' => $products]);
+        $productSerials = ! $request->paginate || $request->paginate === 'true' ?
+            $productSerials->paginate() :
+            $productSerials->get()
+        ;
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'data' => $productSerials]);
+        }
+
+        return view('product-serial.index', compact('productSerials'));
     }
 
     /**
@@ -27,7 +42,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('product-serial.form');
     }
 
     /**
@@ -38,12 +53,14 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = Product::query()->upcOrSku($request->get('upc'), $request->get('sku'))->first();
+        $exists = ProductSerial::query()->with(['product'])->where('serial', $request->serial)->first();
 
-        if (! $product) {
-            $product = new Product($request->all());
-            $product->save();
+        if ($exists) {
+            return response()->json(['success' => false, 'err' => 'serial_exists', 'data' => $exists], 400);
         }
+
+        $productSerial = new ProductSerial($request->all());
+        $productSerial->save();
 
         return response()->json(['success' => true]);
     }
@@ -90,6 +107,22 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $productSerial = ProductSerial::query()->uuid($id)->firstOrFail();
+        $productSerial->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Search by product
+     *
+     * @param $id
+     * @return JsonResponse
+     */
+    public function byProduct($id)
+    {
+        $product = Product::query()->uuid($id)->firstOrFail();
+
+        return response()->json(['success' => true, 'data' => $product->productSerials()->get()]);
     }
 }

@@ -141,4 +141,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(DigitalInventoryObservation::class);
     }
+
+    /**
+     * Product serials loaded by this user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function productSerials()
+    {
+        return $this->hasMany(ProductSerial::class);
+    }
 }

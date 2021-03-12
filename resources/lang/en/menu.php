@@ -8,6 +8,7 @@ return [
     'security' => 'Security',
     'digitalInventory' => 'Digital inventory',
     'warehouse' => 'Warehouse',
-    'inventoryCrossover' => 'Inventory crossover'
+    'inventoryCrossover' => 'Inventory crossover',
+    'productSerials' => 'Product serials'
 
 ];

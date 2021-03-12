@@ -41,6 +41,20 @@
                         ]
                     ]
                 ])
+
+            @include('layouts.navbar-item', [
+                    'label' => __('menu.productSerials'),
+                    'items' => [
+                        [
+                            'label' => __('menu.addNew'),
+                            'route' => route('product-serial.create'),
+                        ],
+                        [
+                            'label' => __('menu.list'),
+                            'route' => route('product-serial.index'),
+                        ]
+                    ]
+                ])
         @endauth
     </ul>
 
