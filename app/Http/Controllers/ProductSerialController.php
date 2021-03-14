@@ -84,7 +84,10 @@ class ProductSerialController extends Controller
      */
     public function edit($id)
     {
-        //
+        $product = Product::query()->uuid($id)->firstOrFail();
+
+
+        return view('product-serial.form', compact('product'));
     }
 
     /**

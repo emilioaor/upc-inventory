@@ -132,7 +132,7 @@
 
         mounted() {
             if (this.editData) {
-                this.form = {...this.editData};
+                this.changeProduct(this.editData);
             }
         },
 

@@ -2,7 +2,7 @@
 
 @section('content')
     <product-serial-form
-        :edit-data = "{{ isset($productSerial) ? json_encode($productSerial) : 'null' }}"
+        :edit-data = "{{ isset($product) ? json_encode($product) : 'null' }}"
         :user = "{{ json_encode(Auth::user()) }}"
     ></product-serial-form>
 @endsection

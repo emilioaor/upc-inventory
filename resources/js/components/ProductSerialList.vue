@@ -16,7 +16,8 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>{{ t('validation.attributes.description') }}</th>
+                        <th>{{ t('validation.attributes.serial') }}</th>
+                        <th>{{ t('validation.attributes.product') }}</th>
                         <th>{{ t('validation.attributes.createdBy') }}</th>
                         <th>{{ t('validation.attributes.createdAt') }}</th>
                         <th width="5%"></th>
@@ -24,11 +25,12 @@
                     </thead>
                     <tbody>
                     <tr v-for="item in items" :key="item.id">
-                        <td>{{ item.description }}</td>
+                        <td>{{ item.serial }}</td>
+                        <td>{{ item.product.name }}</td>
                         <td>{{ item.user.name }}</td>
                         <td>{{ item.created_at |date(true) }}</td>
                         <td>
-                            <a :href="'/warehouse/inventory/' + item.uuid + '/edit'" class="btn btn-warning">
+                            <a :href="'/warehouse/product-serial/' + item.product.uuid + '/edit'" class="btn btn-warning">
                                 <i class="fa fa-edit"></i>
                             </a>
                         </td>
