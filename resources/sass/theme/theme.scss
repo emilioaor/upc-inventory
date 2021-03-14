@@ -82,3 +82,29 @@ body {
         background-color: #1A3660;
     }
 }
+
+.print-only {
+    display: none !important;
+}
+
+@media print {
+    body, .form-control {
+        border: none;
+    }
+
+    .print-hide {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .print-only-i-block {
+        display: inline-block !important;
+    }
+
+    .card {
+        border: none !important;
+    }
+}

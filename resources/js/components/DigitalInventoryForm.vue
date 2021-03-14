@@ -2,7 +2,7 @@
     <div class="container">
         <form class="techland-form" @submit.prevent="validateForm()">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header print-hide">
                     <div v-if="editData">
                         <i class="fa fa-edit"></i> {{ t('form.edit') }} {{ t('menu.digitalInventory') }}
                     </div>
@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row ">
                         <div class="col-sm-6 col-lg-4 form-group">
                             <label for="description">{{ t('validation.attributes.description') }}</label>
                             <input
@@ -73,7 +73,7 @@
                             >
                         </div>
 
-                        <div class="col-sm-6 col-lg-4 form-group" v-if="crossoverSelect">
+                        <div class="col-sm-6 col-lg-4 form-group print-hide" v-if="crossoverSelect">
                             <label>{{ t('validation.attributes.inventory_crossover_enabled') }}</label>
                             <div>
                                 <div>
@@ -95,7 +95,7 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-6 col-lg-4 form-group" v-else>
+                        <div class="col-sm-6 col-lg-4 form-group print-hide" v-else>
                             <button
                                     type="button"
                                     class="btn btn-success"
@@ -121,7 +121,7 @@
 
                     </div>
 
-                    <div class="card" v-if="editData">
+                    <div class="card print-hide" v-if="editData">
                         <div class="card-header d-flex bg-secondary pointer" @click="accordion.observation = !accordion.observation">
                             <div class="col-8">
                                 <i class="fa fa-comment"></i>
@@ -169,7 +169,7 @@
                     </div>
 
                     <div class="card mt-3" v-if="editData">
-                        <div class="card-header d-flex bg-secondary pointer" @click="accordion.inventory = !accordion.inventory">
+                        <div class="card-header d-flex bg-secondary pointer print-hide" @click="accordion.inventory = !accordion.inventory">
                             <div class="col-8">
                                 <i class="fa fa-list-alt"></i>
                                 {{ t('form.inventory') }}
@@ -181,7 +181,7 @@
                         </div>
                         <div class="card-body" v-show="accordion.inventory">
 
-                            <div class="row">
+                            <div class="row print-hide">
                                 <div class="form-group col-md-6">
                                     <div class="input-group">
                                         <div class="input-group-append">
@@ -208,7 +208,7 @@
                                         <th width="1%" class="text-center">{{ t('validation.attributes.digital') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.physical') }}</th>
                                         <th width="1%" class="text-center">{{ t('validation.attributes.diff') }}</th>
-                                        <th width="1%"></th>
+                                        <th width="1%" class="print-hide"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -219,7 +219,7 @@
                                         <td class="text-center">{{ product.digital }}</td>
                                         <td class="text-center">{{ product.physical }}</td>
                                         <td class="text-center">{{ product.physical - product.digital }}</td>
-                                        <td>
+                                        <td class="print-hide">
                                             <button
                                                 type="button"
                                                 class="btn btn-primary btn-sm"
@@ -251,6 +251,16 @@
                         <i class="fa fa-download"></i>
                         {{ t('form.downloadExcel') }}
                     </a>
+
+                    <button
+                        type="button"
+                        class="btn btn-info text-white"
+                        v-if="!loading && editData"
+                        @click="print()"
+                    >
+                        <i class="fa fa-print"></i>
+                        {{ t('form.print') }}
+                    </button>
 
                     <i v-if="loading" class="spinner-border spinner-border-sm"></i>
                 </div>
@@ -1097,6 +1107,12 @@
                         this.newObservation.loading = false;
                     })
                 }
+            },
+
+            print() {
+                this.accordion.observation = false;
+                this.accordion.inventory = true;
+                window.setTimeout(window.print);
             }
         },
 
@@ -1195,5 +1211,11 @@
 
     #modalConfirmationChangeProduct {
         background-color: rgba(0,0,0,0.5);
+    }
+
+    @media print {
+        .card-footer {
+            display: none;
+        }
     }
 </style>
