@@ -243,6 +243,15 @@
                         {{ t('form.save') }}
                     </button>
 
+                    <a
+                        :href="'/manager/digital-inventory/' + editData.uuid + '/excel'"
+                        class="btn btn-primary"
+                        v-if="!loading && editData"
+                    >
+                        <i class="fa fa-download"></i>
+                        {{ t('form.downloadExcel') }}
+                    </a>
+
                     <i v-if="loading" class="spinner-border spinner-border-sm"></i>
                 </div>
             </div>

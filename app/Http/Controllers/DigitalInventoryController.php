@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DigitalInventoryExport;
 use App\Models\DigitalInventory;
 use App\Service\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DigitalInventoryController extends Controller
 {
@@ -121,5 +123,18 @@ class DigitalInventoryController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Export to excel
+     *
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function excel($id)
+    {
+        $digitalInventory = DigitalInventory::query()->uuid($id)->firstOrFail();
+
+        return Excel::download(new DigitalInventoryExport($digitalInventory), 'digital-inventory-' . $id . '.xlsx');
     }
 }

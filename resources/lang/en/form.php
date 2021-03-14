@@ -39,6 +39,7 @@ return [
     'confirmationChangeProduct' => 'You are trying to add a product for another UPC / SKU. Are you sure?',
     'filterByUPCorSKU' => 'Filter by UPC or SKU',
     'addSerial' => 'Add serial',
+    'downloadExcel' => 'Download excel',
 
     'scanMethod' => [
         'units' => 'Units',

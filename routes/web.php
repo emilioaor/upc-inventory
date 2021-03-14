@@ -36,6 +36,7 @@ Route::group(['middleware' => 'auth'], function () {
         'roles' => ['administrator', 'inventory_manager']
     ], function () {
         // Inventory manager
+        Route::get('digital-inventory/{digital_inventory}/excel', [\App\Http\Controllers\DigitalInventoryController::class, 'excel']);
         Route::resource('digital-inventory', \App\Http\Controllers\DigitalInventoryController::class);
     });
 
