@@ -87,7 +87,8 @@ class DigitalInventoryController extends Controller
             ->with([
                 'digitalInventoryMovements.product',
                 'physicalInventoryMovements.product',
-                'user'
+                'user',
+                'digitalInventoryObservations'
             ])
             ->uuid($id)
             ->firstOrFail()

@@ -152,10 +152,7 @@
                                 {{ t('form.save') }}
                             </button>
 
-                            <div
-                                    v-for="observation in form.digital_inventory_observations"
-                                    v-if="user.role === 'administrator' || user.id === observation.user.id"
-                            >
+                            <div v-for="observation in form.digital_inventory_observations">
                                 <hr>
                                 <div>
                                     <small>
