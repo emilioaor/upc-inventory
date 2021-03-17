@@ -176,7 +176,10 @@ return [
         'scanMethod' => 'Scan method',
         'upc_or_sku' => 'UPC or SKU',
         'qtyPerBox' => 'Units per box',
-        'boxes' => 'Boxes'
+        'boxes' => 'Boxes',
+        'wholesaler' => 'Wholesaler',
+        'invoiceNumber' => 'Invoice number',
+        'serials' => 'Serials'
     ],
 
 ];

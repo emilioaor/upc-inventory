@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductSerial;
+use App\Models\ProductSerialGroup;
+use App\Service\AlertService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -17,22 +19,14 @@ class ProductSerialController extends Controller
      */
     public function index(Request $request)
     {
-        $productSerials = ProductSerial::query()
-            ->with(['product', 'user'])
+        $productSerialGroups = ProductSerialGroup::query()
+            ->with(['user'])
             ->search($request->search)
             ->orderBy('id', 'DESC')
+            ->paginate()
         ;
 
-        $productSerials = ! $request->paginate || $request->paginate === 'true' ?
-            $productSerials->paginate() :
-            $productSerials->get()
-        ;
-
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'data' => $productSerials]);
-        }
-
-        return view('product-serial.index', compact('productSerials'));
+        return view('product-serial.index', compact('productSerialGroups'));
     }
 
     /**
@@ -53,16 +47,12 @@ class ProductSerialController extends Controller
      */
     public function store(Request $request)
     {
-        $exists = ProductSerial::query()->with(['product'])->where('serial', $request->serial)->first();
+        $productSerialGroup = new ProductSerialGroup($request->all());
+        $productSerialGroup->save();
 
-        if ($exists) {
-            return response()->json(['success' => false, 'err' => 'serial_exists', 'data' => $exists], 400);
-        }
+        AlertService::alertSuccess(__('alert.processSuccessfully'));
 
-        $productSerial = new ProductSerial($request->all());
-        $productSerial->save();
-
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'redirect' => route('product-serial.edit', [$productSerialGroup->uuid])]);
     }
 
     /**
@@ -84,10 +74,9 @@ class ProductSerialController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::query()->uuid($id)->firstOrFail();
+        $productSerialGroup = ProductSerialGroup::query()->with(['productSerials.product'])->uuid($id)->firstOrFail();
 
-
-        return view('product-serial.form', compact('product'));
+        return view('product-serial.form', compact('productSerialGroup'));
     }
 
     /**
@@ -99,7 +88,13 @@ class ProductSerialController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $productSerialGroup = ProductSerialGroup::query()->uuid($id)->firstOrFail();
+        $productSerialGroup->fill($request->all());
+        $productSerialGroup->save();
+
+        AlertService::alertSuccess(__('alert.processSuccessfully'));
+
+        return response()->json(['success' => true, 'redirect' => route('product-serial.edit', [$id])]);
     }
 
     /**
@@ -127,5 +122,25 @@ class ProductSerialController extends Controller
         $product = Product::query()->uuid($id)->firstOrFail();
 
         return response()->json(['success' => true, 'data' => $product->productSerials()->get()]);
+    }
+
+    /**
+     * Add serial
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addSerial(Request $request)
+    {
+        $exists = ProductSerial::query()->with(['product'])->where('serial', $request->serial)->first();
+
+        if ($exists) {
+            return response()->json(['success' => false, 'err' => 'serial_exists', 'data' => $exists], 400);
+        }
+
+        $productSerial = new ProductSerial($request->all());
+        $productSerial->save();
+
+        return response()->json(['success' => true, 'data' => $productSerial]);
     }
 }

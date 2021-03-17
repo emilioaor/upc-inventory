@@ -56,7 +56,9 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = Product::query()->upcOrSku($id, $id)->first();
+
+        return response()->json(['success' => true, 'data' => $product]);
     }
 
     /**

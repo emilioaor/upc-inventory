@@ -52,6 +52,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::post('inventory/{inventory}/observation', [\App\Http\Controllers\InventoryController::class, 'observation']);
         Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
         Route::resource('product', \App\Http\Controllers\ProductController::class);
+        Route::post('product-serial/serial', [\App\Http\Controllers\ProductSerialController::class, 'addSerial']);
         Route::get('product-serial/{product}/product', [\App\Http\Controllers\ProductSerialController::class, 'byProduct']);
         Route::resource('product-serial', \App\Http\Controllers\ProductSerialController::class);
     });

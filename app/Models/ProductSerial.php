@@ -7,7 +7,6 @@ use App\Contract\UuidGeneratorTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class ProductSerial extends Model
 {
@@ -15,22 +14,9 @@ class ProductSerial extends Model
     use UuidGeneratorTrait;
     use SearchTrait;
 
-    protected $fillable = ['serial', 'product_id'];
+    protected $fillable = ['serial', 'product_id', 'product_serial_group_id'];
 
     protected $search_fields = ['serial', 'products.name'];
-
-    /**
-     * ProductSerial constructor.
-     * @param array $attributes
-     */
-    public function __construct(array $attributes = [])
-    {
-        if (Auth::check() && ! $this->id) {
-            $this->user_id = Auth::user()->id;
-        }
-
-        parent::__construct($attributes);
-    }
 
     /**
      * Product
@@ -43,13 +29,13 @@ class ProductSerial extends Model
     }
 
     /**
-     * Created by
+     * Product serial group
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function user()
+    public function productSerialGroup()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(ProductSerialGroup::class);
     }
 
     /**

@@ -40,6 +40,7 @@ return [
     'filterByUPCorSKU' => 'Filter by UPC or SKU',
     'addSerial' => 'Add serial',
     'downloadExcel' => 'Download excel',
+    'serials' => 'Serials',
 
     'scanMethod' => [
         'units' => 'Units',
