@@ -69,7 +69,7 @@
                             <div class="row">
 
                                 <div class="col-sm-6 col-lg-5 form-group">
-                                    <label>{{ t('validation.attributes.upc_or_sku') }}</label>
+                                    <label>{{ t('validation.attributes.upc') }}</label>
 
                                     <div class="input-group">
                                         <input
@@ -141,27 +141,47 @@
                                         <tr>
                                             <th width="40%">{{ t('validation.attributes.product') }}</th>
                                             <th width="60%">{{ t('validation.attributes.serials') }}</th>
+                                            <th></th>
+                                            <th></th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                             <tr v-for="product in productSerialsOrdered">
                                                 <td>{{ product.name }}</td>
                                                 <td>
-                                                    <span class="serial" v-for="productSerial in product.product_serials">
-                                                        {{ productSerial.serial }}
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-danger btn-sm"
-                                                            @click="deleteSerial(productSerial)"
-                                                            :disabled="loadingDelete === productSerial.id"
-                                                        >
-                                                            <i class="fa fa-remove"></i>
-                                                        </button>
-                                                    </span>
-
-                                                    <button type="button" class="btn btn-success" @click="addNewSerial(product)">
+                                                    <template v-if="detail === product.id">
+                                                        <span class="serial" v-for="productSerial in product.product_serials">
+                                                            {{ productSerial.serial }}
+                                                            <button
+                                                                    type="button"
+                                                                    class="btn btn-danger btn-sm"
+                                                                    @click="deleteSerial(productSerial)"
+                                                                    :disabled="loadingDelete === productSerial.id"
+                                                            >
+                                                                <i class="fa fa-remove"></i>
+                                                            </button>
+                                                        </span>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{ product.product_serials.length }}
+                                                    </template>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-success" @click="addNewSerial(product)">
                                                         <i class="fa fa-plus"></i>
-                                                        {{ t('form.add') }}
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm"
+                                                        :class="{
+                                                            'btn-primary': detail === product.id,
+                                                            'btn-secondary': detail !== product.id
+                                                        }"
+                                                        @click="showDetail(product)"
+                                                    >
+                                                        <i class="fa fa-eye"></i>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -180,6 +200,40 @@
                         <i class="fa fa-save"></i>
                         {{ t('form.save') }}
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <button type="button" class="d-none" id="openCreateProductModal" data-toggle="modal" data-target="#modalCreateProduct"></button>
+        <div class="modal fade" id="modalCreateProduct" tabindex="-1" role="dialog" aria-labelledby="modalCreateProduct" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5>{{ t('form.addNewProduct') }}</h5>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label>{{ t('validation.attributes.name') }}</label>
+                            <input type="text" id="newProduct_name" class="form-control" v-model="newProduct.name">
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <i class="spinner-border spinner-border-sm" v-if="newProduct.loading"></i>
+
+                        <button v-if="!newProduct.loading" class="btn btn-success" type="button" data-dismiss="modal" @click="createProduct()">
+                            {{ t('form.save') }}
+                        </button>
+
+                        <button v-show="!newProduct.loading" id="closeCreateProductModal" class="btn btn-secondary" type="button" data-dismiss="modal" >
+                            {{ t('form.cancel') }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -229,7 +283,13 @@
                     product_id: null,
                     error: null
                 },
-                loadingDelete: null
+                newProduct: {
+                    name: null,
+                    upc: null,
+                    loading: false
+                },
+                loadingDelete: null,
+                detail: null
             }
         },
 
@@ -258,24 +318,36 @@
                 })
             },
 
-            changeUPC(product) {
+            changeUPC() {
 
-                this.newSerial.loading = true;
+                if (this.newSerial.upc) {
+                    this.newSerial.loading = true;
 
-                ApiService.get('/warehouse/product/' + this.newSerial.upc).then(res => {
+                    ApiService.get('/warehouse/product/' + this.newSerial.upc).then(res => {
 
-                    if (res.data.data) {
-                        this.newSerial.product = res.data.data;
-                        this.newSerial.product_id = res.data.data.id;
+                        if (res.data.data) {
+                            this.newSerial.product = res.data.data;
+                            this.newSerial.product_id = res.data.data.id;
+                            this.newSerial.loading = false;
+                            window.setTimeout(() => document.querySelector('#newSerial').focus())
+                        } else {
+                            this.newSerial.loading = false;
+                            this.newProduct.upc = this.newSerial.upc;
+                            document.querySelector('#openCreateProductModal').click()
+                        }
+
+                    }).catch(err => {
                         this.newSerial.loading = false;
-                        window.setTimeout(() => document.querySelector('#newSerial').focus())
-                    } else {
-                        // TODO agregar producto
-                    }
+                    });
+                }
+            },
 
-                }).catch(err => {
-                    this.newSerial.loading = false;
-                });
+            showDetail(product) {
+                if (this.detail === product.id) {
+                    this.detail = null;
+                } else {
+                    this.detail = product.id
+                }
             },
 
             addNewSerial(product) {
@@ -335,6 +407,28 @@
                 this.newSerial.serial = null;
                 this.newSerial.product = null;
                 this.newSerial.product_id = null;
+            },
+
+            createProduct() {
+                if (this.newProduct.name) {
+
+                    this.newProduct.loading = true;
+
+                    ApiService.post('/warehouse/product', this.newProduct)
+                        .then(res => {
+
+                            if (res.data.success) {
+                                this.newSerial.upc = this.newProduct.upc;
+                                this.newProduct.upc = null;
+                                this.newProduct.name = null;
+                                this.changeUPC();
+                                document.querySelector('#closeCreateProductModal').click();
+                            }
+                        })
+                        .catch(err => {
+                            this.newProduct.loading = false;
+                        })
+                }
             }
         },
 
