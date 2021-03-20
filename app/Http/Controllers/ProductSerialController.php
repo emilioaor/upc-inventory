@@ -7,6 +7,7 @@ use App\Models\ProductSerial;
 use App\Models\ProductSerialGroup;
 use App\Service\AlertService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductSerialController extends Controller
@@ -132,15 +133,26 @@ class ProductSerialController extends Controller
      */
     public function addSerial(Request $request)
     {
-        $exists = ProductSerial::query()->with(['product'])->where('serial', $request->serial)->first();
+        $exists = ProductSerial::query()->with(['product'])->whereIn('serial', $request->serial)->first();
 
         if ($exists) {
             return response()->json(['success' => false, 'err' => 'serial_exists', 'data' => $exists], 400);
         }
 
-        $productSerial = new ProductSerial($request->all());
-        $productSerial->save();
+        DB::beginTransaction();
 
-        return response()->json(['success' => true, 'data' => $productSerial]);
+        $productSerials = [];
+
+        foreach ($request->serial as $serial) {
+            $productSerial = new ProductSerial($request->all());
+            $productSerial->serial = $serial;
+            $productSerial->save();
+
+            $productSerials[] = $productSerial;
+        }
+
+        DB::commit();
+
+        return response()->json(['success' => true, 'data' => $productSerials]);
     }
 }

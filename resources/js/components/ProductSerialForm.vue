@@ -103,16 +103,17 @@
                                         <small>({{ newSerial.product.name }})</small>
                                     </label>
                                     <div class="input-group">
-                                        <input
-                                                type="text"
+                                        <textarea
+                                                rows="1"
                                                 id="newSerial"
                                                 class="form-control"
                                                 :class="{'is-invalid': newSerial.error}"
                                                 v-model="newSerial.serial"
                                                 :disabled="! newSerial.product || newSerial.loading"
                                                 @keyup.prevent.13="addSerial()"
+                                                @focus="newSerial.serial = null"
                                                 autocomplete="off"
-                                        >
+                                        ></textarea>
                                         <span class="input-group-btn">
                                             <button
                                                     type="button"
@@ -358,34 +359,78 @@
                 window.setTimeout(() =>document.querySelector('#newSerial').focus());
             },
 
+            waitChanges() {
+                return new Promise(resolve => {
+                    const currentValue = this.newSerial.serial;
+
+                    window.setTimeout(() => {
+                        resolve(currentValue === this.newSerial.serial);
+                    }, 100)
+                })
+            },
+
             addSerial() {
                 if (this.newSerial.serial) {
 
-                    this.newSerial.loading = true;
+                    this.waitChanges().then(res => {
 
-                    ApiService.post('/warehouse/product-serial/serial', {
-                        serial: this.newSerial.serial,
-                        product_id: this.newSerial.product_id,
-                        product_serial_group_id: this.form.id
-                    }).then(res => {
+                        if (res) {
+                            const serials = this.checkQR(this.newSerial.serial);
+                            this.newSerial.loading = true;
 
-                        this.form.product_serials.push({
-                            ...res.data.data,
-                            product: {... this.newSerial.product}
-                        });
+                            ApiService.post('/warehouse/product-serial/serial', {
+                                serial: serials,
+                                product_id: this.newSerial.product_id,
+                                product_serial_group_id: this.form.id
+                            }).then(res => {
 
-                        this.newSerial.loading = false;
-                        this.newSerial.serial = null;
-                        window.setTimeout(() => document.querySelector('#newSerial').focus());
+                                res.data.data.forEach(ps => {
+                                    this.form.product_serials.push({
+                                        ...ps,
+                                        product: {... this.newSerial.product}
+                                    });
+                                });
 
-                    }).catch(err => {
-                        this.newSerial.loading = false;
+                                this.newSerial.loading = false;
+                                this.newSerial.serial = null;
+                                window.setTimeout(() => document.querySelector('#newSerial').focus());
 
-                        if (err.response.data.err === 'serial_exists') {
-                            this.newSerial.error = err.response.data.data;
+                            }).catch(err => {
+                                this.newSerial.loading = false;
+
+                                if (err.response.data.err === 'serial_exists') {
+                                    this.newSerial.error = err.response.data.data;
+                                }
+                            })
                         }
                     })
                 }
+            },
+
+            checkQR(serial) {
+
+                if (serial.trim().split('/').length > 1) {
+                    // Codigos separados por Slash
+                    serial = serial.trim().split('/');
+
+                } else if (serial.trim().split(',').length > 1) {
+                    // Codigos separados por coma
+                    serial = serial.trim().split(',').filter(s => s);
+
+                } else if (serial.trim().split(' ').length > 1) {
+                    // Codigos separados por espacio
+                    serial = serial.trim().split(' ').filter((s, i) => i > 0);
+
+                } else if (serial.trim().split(/\n/).length > 1) {
+                    // Codigos separados por salto de linea
+                    serial = serial.trim().split(/\n/);
+
+                } else {
+                    // Serial unico
+                    serial = [serial];
+                }
+
+                return serial;
             },
 
             deleteSerial(productSerial) {
@@ -485,5 +530,10 @@
         border-radius: 5px;
         font-size: 12px;
         margin: .3rem;
+    }
+
+    #newSerial {
+        resize: none;
+        overflow: hidden;
     }
 </style>
