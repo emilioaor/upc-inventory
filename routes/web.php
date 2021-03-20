@@ -54,6 +54,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('product', \App\Http\Controllers\ProductController::class);
         Route::post('product-serial/serial', [\App\Http\Controllers\ProductSerialController::class, 'addSerial']);
         Route::get('product-serial/{product}/product', [\App\Http\Controllers\ProductSerialController::class, 'byProduct']);
+        Route::post('product-serial/{product_serial}/email', [\App\Http\Controllers\ProductSerialController::class, 'sendEmail']);
+        Route::get('product-serial/{product_serial}/excel', [\App\Http\Controllers\ProductSerialController::class, 'excel']);
         Route::resource('product-serial', \App\Http\Controllers\ProductSerialController::class);
     });
 

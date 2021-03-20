@@ -41,6 +41,8 @@ return [
     'addSerial' => 'Add serial',
     'downloadExcel' => 'Download excel',
     'serials' => 'Serials',
+    'sendByEmail' => 'Send by email',
+    'addEmail' => 'Add email',
 
     'scanMethod' => [
         'units' => 'Units',

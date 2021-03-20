@@ -53,8 +53,27 @@
                             <input type="text" class="form-control" :value="form.created_at | date(true)" disabled>
                         </div>
                     </div>
+                </div>
 
-                    <div class="card" v-if="editData">
+                <div class="card-footer">
+                    <i class="spinner-border spinner-border-sm" v-if="loading"></i>
+
+                    <button class="btn btn-success" v-if="! loading" @click="validateForm()">
+                        <i class="fa fa-save"></i>
+                        {{ t('form.save') }}
+                    </button>
+
+                    <product-serial-email
+                        v-if="editData && !loading"
+                        :title="t('form.sendByEmail')"
+                        :editData="editData"
+                    ></product-serial-email>
+
+                </div>
+
+                <div class="card-body pt-0" v-if="editData">
+                    <hr class="mt-0">
+                    <div class="card">
                         <div class="card-header bg-secondary d-flex pointer" @click="accordion.serial = ! accordion.serial">
                             <div class="col-8">
                                 <i class="fa fa-barcode"></i>
@@ -147,10 +166,10 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="product in productSerialsOrdered">
-                                                <td>{{ product.name }}</td>
-                                                <td>
-                                                    <template v-if="detail === product.id">
+                                        <tr v-for="product in productSerialsOrdered">
+                                            <td>{{ product.name }}</td>
+                                            <td>
+                                                <template v-if="detail === product.id">
                                                         <span class="serial" v-for="productSerial in product.product_serials">
                                                             {{ productSerial.serial }}
                                                             <button
@@ -162,18 +181,18 @@
                                                                 <i class="fa fa-remove"></i>
                                                             </button>
                                                         </span>
-                                                    </template>
-                                                    <template v-else>
-                                                        {{ product.product_serials.length }}
-                                                    </template>
-                                                </td>
-                                                <td>
-                                                    <button type="button" class="btn btn-sm btn-success" @click="addNewSerial(product)">
-                                                        <i class="fa fa-plus"></i>
-                                                    </button>
-                                                </td>
-                                                <td>
-                                                    <button
+                                                </template>
+                                                <template v-else>
+                                                    {{ product.product_serials.length }}
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-success" @click="addNewSerial(product)">
+                                                    <i class="fa fa-plus"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button
                                                         type="button"
                                                         class="btn btn-sm"
                                                         :class="{
@@ -181,26 +200,17 @@
                                                             'btn-secondary': detail !== product.id
                                                         }"
                                                         @click="showDetail(product)"
-                                                    >
-                                                        <i class="fa fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                                >
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="card-footer">
-                    <i class="spinner-border spinner-border-sm" v-if="loading"></i>
-
-                    <button class="btn btn-success" v-if="! loading" @click="validateForm()">
-                        <i class="fa fa-save"></i>
-                        {{ t('form.save') }}
-                    </button>
                 </div>
             </div>
         </div>

@@ -50,4 +50,31 @@ class ProductSerialGroup extends Model
     {
         return $this->hasMany(ProductSerial::class);
     }
+
+    /**
+     * Product serials by product
+     *
+     * @return array
+     */
+    public function productSerialsByProduct()
+    {
+        $products = [];
+        $productControl = [];
+
+        foreach ($this->productSerials as $productSerial) {
+
+            if (! isset($productControl[$productSerial->product_id])) {
+
+                $temp = $productSerial->product->toArray();
+                $temp['productSerials'] = [];
+                $products[] = $temp;
+                $productControl[$productSerial->product_id] = count($products) - 1;
+            }
+
+            $index = $productControl[$productSerial->product_id];
+            $products[$index]['productSerials'][] = $productSerial->toArray();
+        }
+
+        return $products;
+    }
 }

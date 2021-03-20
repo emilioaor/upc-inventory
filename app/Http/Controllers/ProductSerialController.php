@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductSerialExport;
+use App\Mail\ProductSerialMail;
 use App\Models\Product;
 use App\Models\ProductSerial;
 use App\Models\ProductSerialGroup;
 use App\Service\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductSerialController extends Controller
@@ -154,5 +158,36 @@ class ProductSerialController extends Controller
         DB::commit();
 
         return response()->json(['success' => true, 'data' => $productSerials]);
+    }
+
+    /**
+     * Send email
+     *
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendEmail(Request $request, $id)
+    {
+        $productSerialGroup = ProductSerialGroup::query()->with(['productSerials.product'])->uuid($id)->firstOrFail();
+
+        Mail::send(new ProductSerialMail($productSerialGroup, $request->emails));
+
+        AlertService::alertSuccess(__('alert.processSuccessfully'));
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Download excel
+     *
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function excel($id)
+    {
+        $productSerialGroup = ProductSerialGroup::query()->with(['productSerials.product'])->uuid($id)->firstOrFail();
+
+        return Excel::download(new ProductSerialExport($productSerialGroup), $id . '.xlsx');
     }
 }
