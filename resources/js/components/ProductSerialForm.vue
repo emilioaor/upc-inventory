@@ -87,22 +87,23 @@
                         <div class="card-body" v-show="accordion.serial">
                             <div class="row">
 
-                                <div class="col-sm-6 col-lg-5 form-group">
-                                    <label>{{ t('validation.attributes.upc') }}</label>
+                                <div class="col-sm-6 col-lg-5">
+                                    <div class="form-group">
+                                        <label>{{ t('validation.attributes.upc') }}</label>
 
-                                    <div class="input-group">
-                                        <input
-                                                type="text"
-                                                id="newUPC"
-                                                class="form-control"
-                                                v-model="newSerial.upc"
-                                                @keyup.13="changeUPC()"
-                                                @focus="resetProduct()"
-                                                autocomplete="off"
-                                                :disabled="newSerial.loading"
-                                        >
+                                        <div class="input-group">
+                                            <input
+                                                    type="text"
+                                                    id="newUPC"
+                                                    class="form-control"
+                                                    v-model="newSerial.upc"
+                                                    @keyup.13="changeUPC()"
+                                                    @focus="resetProduct()"
+                                                    autocomplete="off"
+                                                    :disabled="newSerial.loading"
+                                            >
 
-                                        <span class="input-group-btn">
+                                            <span class="input-group-btn">
                                             <button
                                                     type="button"
                                                     class="btn btn-secondary"
@@ -113,17 +114,29 @@
                                                 <i class="fa fa-check" v-else ></i>
                                             </button>
                                         </span>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        <label>{{ t('validation.attributes.product') }}</label>
+
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            :value="newSerial.product ? newSerial.product.name : ''"
+                                            disabled>
                                     </div>
                                 </div>
 
                                 <div class="col-sm-6 col-md-5 form-group" v-if="newSerial.product">
                                     <label>
                                         {{ t('form.addSerial') }}
-                                        <small>({{ newSerial.product.name }})</small>
+                                        <small>({{ t('form.introToSave') }})</small>
                                     </label>
                                     <div class="input-group">
                                         <textarea
-                                                rows="1"
+                                                rows="4"
                                                 id="newSerial"
                                                 class="form-control"
                                                 :class="{'is-invalid': newSerial.error}"
@@ -132,7 +145,7 @@
                                                 @keyup.prevent.13="addSerial()"
                                                 autocomplete="off"
                                         ></textarea>
-                                        <span class="input-group-btn">
+                                        <span class="input-group-btn d-flex flex-column">
                                             <button
                                                     type="button"
                                                     id="addSerial"
@@ -141,7 +154,15 @@
                                                     @click="addSerial()"
                                             >
                                                 <i class="spinner-border spinner-border-sm" v-if="newSerial.loading"></i>
-                                                <i class="fa fa-plus" v-else ></i>
+                                                <i class="fa fa-save" v-else ></i>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-danger"
+                                                :disabled="newSerial.loading"
+                                                @click="newSerial.serial = null"
+                                            >
+                                                <i class="fa fa-trash"></i>
                                             </button>
                                         </span>
 
@@ -384,7 +405,7 @@
                     this.waitChanges().then(res => {
 
                         if (res) {
-                            const serials = this.checkQR(this.newSerial.serial);
+                            const serials = this.checkQR(this.newSerial.serial.trim());
                             this.newSerial.loading = true;
 
                             ApiService.post('/warehouse/product-serial/serial', {
@@ -418,26 +439,26 @@
 
             checkQR(serial) {
 
-                if (serial.trim().split('/').length > 1) {
+                if (serial.split('/').length > 1) {
                     // Codigos separados por Slash
-                    serial = serial.trim().split('/');
+                    serial = serial.split('/');
 
-                } else if (serial.trim().split(',').length > 1) {
+                } else if (serial.split(',').length > 1) {
                     // Codigos separados por coma
-                    serial = serial.trim().split(',').filter(s => s);
+                    serial = serial.split(',').filter(s => s);
 
-                } else if (serial.trim().split(' ').length > 1) {
+                } else if (serial.split(' ').length > 1) {
                     // Codigos separados por espacio
-                    serial = serial.trim().split(' ').filter((s, i) => i > 0);
+                    serial = serial.split(' ').filter((s, i) => i > 0);
 
-                } else if (serial.trim().split(/\n/).length > 1) {
+                } else if (serial.split(/\n/).length > 1) {
                     // Codigos separados por salto de linea
-                    serial = serial.trim().split(/\n/);
+                    serial = serial.split(/\n/);
 
                 } else if (serial.length >= 20) {
                     // Seriales juntos sin separador
-                    const start = serial.trim().substring(0, 5);
-                    serial = serial.trim().split(start).filter(s => s).map(s => start + s);
+                    const start = serial.substring(0, 5);
+                    serial = serial.split(start).filter(s => s).map(s => start + s);
 
                 } else {
                     // Serial unico
@@ -548,6 +569,6 @@
 
     #newSerial {
         resize: none;
-        overflow: hidden;
+        height: 7.5rem;
     }
 </style>

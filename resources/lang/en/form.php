@@ -43,6 +43,7 @@ return [
     'serials' => 'Serials',
     'sendByEmail' => 'Send by email',
     'addEmail' => 'Add email',
+    'introToSave' => 'Intro to save',
 
     'scanMethod' => [
         'units' => 'Units',
