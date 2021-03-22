@@ -130,7 +130,6 @@
                                                 v-model="newSerial.serial"
                                                 :disabled="! newSerial.product || newSerial.loading"
                                                 @keyup.prevent.13="addSerial()"
-                                                @focus="newSerial.serial = null"
                                                 autocomplete="off"
                                         ></textarea>
                                         <span class="input-group-btn">
@@ -434,6 +433,11 @@
                 } else if (serial.trim().split(/\n/).length > 1) {
                     // Codigos separados por salto de linea
                     serial = serial.trim().split(/\n/);
+
+                } else if (serial.length >= 20) {
+                    // Seriales juntos sin separador
+                    const start = serial.trim().substring(0, 5);
+                    serial = serial.trim().split(start).filter(s => s).map(s => start + s);
 
                 } else {
                     // Serial unico
