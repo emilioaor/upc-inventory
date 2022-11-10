@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Service\AlertService;
 
 class ProductController extends Controller
 {
@@ -19,7 +20,20 @@ class ProductController extends Controller
 
         return response()->json(['success' => true, 'data' => $products]);
     }
+    
+    /**
+     * Display a listing of the resource.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function list(Request $request)
+    {
+        $products = Product::query()->search($request->search)->paginate();
 
+        return view('product.index', compact('products'));
+    }
+    
     /**
      * Show the form for creating a new resource.
      *
@@ -69,7 +83,9 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        //
+        $product = Product::query()->uuid($id)->firstOrFail();
+
+        return view('product.form', compact('product'));
     }
 
     /**
@@ -81,7 +97,13 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $product = Product::query()->uuid($id)->firstOrFail();
+        $product->name = $request->name;
+        $product->save();
+
+        AlertService::alertSuccess(__('alert.processSuccessfully'));
+
+        return response()->json(['success' => true, 'redirect' => route('product.edit', [$id])]);
     }
 
     /**

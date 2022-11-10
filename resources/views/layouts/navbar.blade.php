@@ -18,6 +18,17 @@
                 ])
 
             @include('layouts.navbar-item', [
+                    'label' => __('menu.products'),
+                    'show' => Auth::user()->isAdmin(),
+                    'items' => [
+                        [
+                            'label' => __('menu.list'),
+                            'route' => route('product.list'),
+                        ]
+                    ]
+                ])
+
+            @include('layouts.navbar-item', [
                     'label' => __('menu.digitalInventory'),
                     'show' => Auth::user()->isAdmin() || Auth::user()->isInventoryManager(),
                     'items' => [

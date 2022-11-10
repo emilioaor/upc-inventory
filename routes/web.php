@@ -28,6 +28,8 @@ Route::group(['middleware' => 'auth'], function () {
         // Administrator
         Route::post('user/exists', [\App\Http\Controllers\UserController::class, 'exists']);
         Route::resource('user', \App\Http\Controllers\UserController::class);
+        Route::get('product/list', [\App\Http\Controllers\ProductController::class, 'list'])->name('product.list');
+        Route::resource('product', \App\Http\Controllers\ProductController::class);
     });
 
     Route::group([
