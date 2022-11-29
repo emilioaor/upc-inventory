@@ -360,6 +360,11 @@
                             this.newSerial.product = res.data.data;
                             this.newSerial.product_id = res.data.data.id;
                             this.newSerial.loading = false;
+                            
+                            if (this.newSerial.product.id !== this.detail) {
+                                this.showDetail(this.newSerial.product);
+                            }
+
                             window.setTimeout(() => document.querySelector('#newSerial').focus())
                         } else {
                             this.newSerial.loading = false;
@@ -386,6 +391,11 @@
                 this.newSerial.serial = null;
                 this.newSerial.product = product;
                 this.newSerial.product_id = product.id;
+
+                if (this.newSerial.product.id !== this.detail) {
+                    this.showDetail(this.newSerial.product);
+                }
+
                 window.setTimeout(() =>document.querySelector('#newSerial').focus());
             },
 
@@ -531,7 +541,7 @@
                       products.push(current)
                   }
 
-                  current.product_serials.push({... serial});
+                  current.product_serials.unshift({... serial});
               });
 
               return products;
@@ -540,6 +550,13 @@
             productSerialsOrdered() {
                 return this.serialsByProduct.sort((a, b) => {
                     if (this.newSerial.product_id && this.newSerial.product_id === a.id) {
+                        return -1;
+                    }
+
+                    const dateA = new Date(a.product_serials[0].created_at);
+                    const dateB = new Date(b.product_serials[0].created_at);
+
+                    if (dateA > dateB) {
                         return -1;
                     }
 
