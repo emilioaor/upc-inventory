@@ -179,8 +179,9 @@
                                     <table class="table table-striped">
                                         <thead>
                                         <tr>
-                                            <th width="40%">{{ t('validation.attributes.product') }}</th>
-                                            <th width="60%">{{ t('validation.attributes.serials') }}</th>
+                                            <th width="37%">{{ t('validation.attributes.product') }}</th>
+                                            <th width="5%">{{ t('validation.attributes.qty') }}</th>
+                                            <th width="58%">{{ t('validation.attributes.serials') }}</th>
                                             <th></th>
                                             <th></th>
                                         </tr>
@@ -188,6 +189,7 @@
                                         <tbody>
                                         <tr v-for="product in productSerialsOrdered">
                                             <td>{{ product.name }}</td>
+                                            <td class="text-center">{{ product.product_serials.length }}</td>
                                             <td>
                                                 <template v-if="detail === product.id">
                                                         <span class="serial" v-for="productSerial in product.product_serials">
@@ -203,7 +205,7 @@
                                                         </span>
                                                 </template>
                                                 <template v-else>
-                                                    {{ product.product_serials.length }}
+                                                    {{ product.product_serials | serialsPreview }}
                                                 </template>
                                             </td>
                                             <td>
@@ -568,6 +570,18 @@
         watch: {
             "newSerial.serial"() {
                 this.newSerial.error = null;
+            }
+        },
+        
+        filters: {
+            serialsPreview(serials) {
+                const txt = serials.map(s => s.serial).join(', ');
+
+                if (txt.length < 50) {
+                    return txt;
+                }
+
+                return txt.substring(0, 50) + '...'
             }
         }
     }
