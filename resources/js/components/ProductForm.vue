@@ -41,7 +41,6 @@
                                 :class="{'is-invalid': errors.has('sku')}"
                                 v-model="form.sku"
                                 v-validate
-                                data-vv-rules="required"
                                 :readonly="true"
                             >
 
